@@ -1,10 +1,13 @@
-assessmentregistry8-site
-common-design-site
-cerf8
-docstore-site
-gho-2022-site
-gms-unocha-org
-iasc8
-odsg8-site
-slt8-site
-sesame-site
+# Use '#' symbol to comment out lines.
+# When adding repos here, also update alternative names in `prod_deploy()`.
+
+# assessmentregistry8-site
+# common-design-site
+# cerf8
+# docstore-site
+# gho-2022-site
+# gms-unocha-org
+# iasc8
+# odsg8-site
+# slt8-site
+# sesame-site
