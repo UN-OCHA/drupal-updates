@@ -30,6 +30,9 @@ wait_to_continue () {
 }
 
 update_branches () {
+# TODO: if this aborts because of unmerged changes, it will not update
+# but won't warn that the update hasn't happened. Check for such silent
+# failures.
   echo "updating main branch for $repo"
   git checkout main
   git pull
@@ -41,6 +44,9 @@ update_branches () {
   echo "- - -"
   echo "- - -"
   echo "Develop and main branches for $repo updated"
+  echo "(or they should be - if there are unmerged changes, the update may fail"
+  echo "check for the word 'Aborting' in the previous output, and later make"
+  echo "this command check for failure and give a proper warning.)"
 }
 
 need_a_feature_branch () {
@@ -52,7 +58,11 @@ need_a_feature_branch () {
   echo "start of output of 'git diff main --name-status'"
   echo "(if it scrolls off the screen, scroll down with 'j' and hit 'q' to escape)"
   git diff main --name-status
+  echo "- - -"
+  echo "- - -"
   echo "output finished."
+  echo "- - -"
+  echo "- - -"
   echo ""
   echo ""
   echo "- - -"
@@ -71,6 +81,8 @@ need_a_feature_branch () {
       "yes")
         echo "setting feature branch for $repo"
         branch_name="feature/${branch_name}"
+        echo "checking out main branch to create feature from"
+        git checkout main
         break;;
       "no")
         echo "continuing"
@@ -124,6 +136,7 @@ composer_update () {
       echo "- - -"
       echo "- - -"
       echo "updating core for $repo"
+      echo "will run 'composer -v update drupal/core-* --with-all-dependencies'"
       echo "- - -"
       echo "- - -"
       composer -v update "drupal/core-*" --with-all-dependencies
@@ -132,6 +145,7 @@ composer_update () {
       echo "- - -"
       echo "- - -"
       echo "updating ${module_name} for $repo"
+      echo "will run 'composer -v update drupal/${module_name} --with-all-dependencies'"
       echo "- - -"
       echo "- - -"
       composer -v update "drupal/${module_name}" --with-all-dependencies
@@ -165,20 +179,29 @@ commit_changes () {
     "core")
       echo "- - -"
       echo "- - -"
-      echo "commiting core update"
+      echo "committing core update"
       echo "- - -"
       echo "- - -"
       new_version=$(composer show -f json drupal/core-recommended | jq .versions[] | sed s/\"//g)
-      git commit -m "[${ticket_number}] update ${update_type} to ${new_version}"
+      git commit -m "chore: update ${update_type} to ${new_version}" -m "Refs: ${ticket_number}"
       return;;
     "contrib")
       echo "- - -"
       echo "- - -"
-      echo "commiting contrib update"
+      echo "committing contrib update"
       echo "- - -"
       echo "- - -"
       new_version=$(composer show -f json "drupal/${module_name}" | jq .versions[] | sed s/\"//g)
-      git commit -m "[${ticket_number}] update ${module_name} module to ${new_version}"
+      git commit -m "chore: update ${module_name} module to ${new_version}" -m "Refs: ${ticket_number}"
+      return;;
+    "other")
+      echo "- - -"
+      echo "- - -"
+      echo "committing changes"
+      echo "- - -"
+      echo "- - -"
+      read -r -p "enter one-line commit message, including the standard commit type, the ticket number will be appended: " commit_message
+      git commit -m "${commit_message}" -m "Refs: ${ticket_number}"
       return;;
   esac
 
@@ -227,10 +250,10 @@ test_on_stage () {
 create_pr () {
 # Get type of update.
   echo "Choose type of update"
-  options=("core" "contrib")
+  options=("core" "contrib" "other")
   select update_type in "${options[@]}"; do
     case $update_type in
-      "core")
+      "core" | "other")
         repolist=()
         echo "List of repos to update:"
         while IFS= read -r -u 3 repo ; do
@@ -262,7 +285,7 @@ create_pr () {
   done
 
   echo "Repos to be updated: "
-  echo "${repolist[*]}"
+  printf '%s\n' "${repolist[*]}"
   wait_to_continue
 
   case $update_type in
@@ -270,6 +293,10 @@ create_pr () {
       branch_name="${ticket_number}-${update_type}-update";;
     "contrib")
       branch_name="${ticket_number}-${module_name}-module-update";;
+    "other")
+      echo "Enter branch name (without the ticket number):"
+      read -r branch_name
+      branch_name="${ticket_number}-${branch_name}";;
   esac
 
   for repo in "${repolist[@]}" ; do
@@ -292,8 +319,11 @@ create_pr () {
 
     check_php_version
 
-    composer_update
-    wait_to_continue
+    case $update_type in
+      "core" | "contrib")
+        composer_update
+        wait_to_continue
+    esac
 
     check_and_add_changes
 
@@ -315,21 +345,24 @@ merge_to_main () {
 
 # Get type of update.
   echo "Choose type of update"
-  options=("core" "contrib")
+  options=("core" "contrib" "other")
   select update_type in "${options[@]}"; do
+    echo "Opening pull requests."
+    while IFS= read -r -u 3 repo ; do
+      # Skip blank lines and commented lines.
+      case "$repo" in ''|\#*) continue ;; esac
+      echo "$repo"
+      xdg-open "${remote_url}/${repo}/compare/main...develop"
+    done 3< repolist.txt
     case $update_type in
       "core" | "contrib")
-        echo "Opening pull requests."
-        while IFS= read -r -u 3 repo ; do
-          # Skip blank lines and commented lines.
-          case "$repo" in ''|\#*) continue ;; esac
-          echo "$repo"
-          xdg-open "${remote_url}/${repo}/compare/main...develop"
-        done 3< repolist.txt
 # Linux copy to both the selection buffer and clipboard with xclip.
         ( command -v xclip >/dev/null 2>&1 ) &&
           echo "[${ticket_number}] $update_type security update " | xclip -i -sel c -f |xclip -i -sel p &&
           echo "Ticket title copied to clipboard"
+            break;;
+      "other")
+# What could be useful here?
             break;;
       *) echo "invalid option ${REPLY}. Please choose a number."
     esac
