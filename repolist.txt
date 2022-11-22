@@ -1,13 +1,49 @@
 # Use '#' symbol to comment out lines.
 # When adding repos here, also update alternative names in `prod_deploy()`.
 
-# assessmentregistry8-site
-# common-design-site
-# cerf8
-# docstore-site
-# gho-2022-site
-# gms-unocha-org
-# iasc8
-# odsg8-site
-# slt8-site
-# sesame-site
+# The stages:
+# 1. create PR
+# 2. test on stage
+# 3. merge to main
+# 4. create tags
+# 5. prod deploy
+
+assessmentregistry8-site
+cerf8
+common-design-site
+docstore-site
+gho-2022-site
+gms-site
+iasc8
+odsg8-site
+response-site
+rwint9-site
+slt8-site
+sesame-site
+whd-2022-site
+# indicatorregistry8-site
+# pocam8-site
+
+# Remember too hrinfo and unocha-org.
+
+# URLs for reference:
+# https://assessments.hpc.tools/
+# https://dev.assessments-hpc-tools.ahconu.org/
+# https://web.brand.unocha.org/
+# https://demo.commondesign-unocha-org.ahconu.org/
+# https://cerf.un.org/
+# https://dev.cerf-un-org.ahconu.org/
+# https://gms.unocha.org/
+# https://dev.gms-unocha-org.ahconu.org/
+# https://interagencystandingcommittee.org/
+# https://dev.interagencystandingcommittee-org.ahconu.org/
+# https://odsg.unocha.org/
+# https://dev.odsg-unocha-org.ahconu.org/
+#
+#
+# https://reliefweb.int/
+# https://dev.reliefweb-int.ahconu.org
+# https://savinglivestogether.unocha.org/welcome?destination=/saving-lives-together
+# http://dev.savinglivestogether-unocha-org.ahconu.org/welcome?destination=/saving-lives-together
+# auth.ahconu.org
+# 

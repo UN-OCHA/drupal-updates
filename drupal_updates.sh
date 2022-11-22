@@ -101,32 +101,7 @@ set_new_branch () {
   echo "- - -"
   echo "- - -"
   echo "bringing composer up-to-date"
-  composer install
-}
-
-check_php_version () {
-  echo "- - -"
-  echo "- - -"
-  echo "checking php version for $repo"
-  echo "- - -"
-  echo "- - -"
-  echo "required php version"
-  echo "composer check-platform-reqs | grep php"
-  composer check-platform-reqs | grep php
-  echo "- - -"
-  echo "- - -"
-  echo "local php version"
-  echo "composer show -p php | grep versions"
-  composer show -p php | grep versions
-  echo "- - -"
-  echo "- - -"
-  echo "compare the output above and, if necessary, alter your version of php"
-  echo "for example (in Ubuntu, if alternatives are already in place):"
-  echo "sudo update-alternatives --set php /usr/bin/php8.0 && sudo update-alternatives --set phar /usr/bin/phar8.0 && sudo update-alternatives --set phar.phar /usr/bin/phar.phar8.0"
-  echo "- - -"
-  echo "- - -"
-  wait_to_continue
-
+  docker run --rm -u "$(id -u)" -v "$(pwd):/srv/www" -w /srv/www -it public.ecr.aws/unocha/unified-builder:8.0-stable sh -c "composer install"
 }
 
 composer_update () {
@@ -136,19 +111,19 @@ composer_update () {
       echo "- - -"
       echo "- - -"
       echo "updating core for $repo"
-      echo "will run 'composer -v update drupal/core-* --with-all-dependencies'"
+      echo "will run 'docker run --rm -u \"$(id -u)\" -v \"$(pwd):/srv/www\" -w /srv/www -it public.ecr.aws/unocha/unified-builder:8.0-stable sh -c \"composer -v update drupal/core-* --with-all-dependencies\"'"
       echo "- - -"
       echo "- - -"
-      composer -v update "drupal/core-*" --with-all-dependencies
+      docker run --rm -u "$(id -u)" -v "$(pwd):/srv/www" -w /srv/www -it public.ecr.aws/unocha/unified-builder:8.0-stable sh -c "composer -v update drupal/core-* --with-all-dependencies"
       return;;
     "contrib")
       echo "- - -"
       echo "- - -"
       echo "updating ${module_name} for $repo"
-      echo "will run 'composer -v update drupal/${module_name} --with-all-dependencies'"
+      echo "will run 'docker run --rm -u \"$(id -u)\" -v \"$(pwd):/srv/www\" -w /srv/www -it public.ecr.aws/unocha/unified-builder:8.0-stable sh -c \"composer -v update drupal/${module_name} --with-all-dependencies\"'"
       echo "- - -"
       echo "- - -"
-      composer -v update "drupal/${module_name}" --with-all-dependencies
+      docker run --rm -u "$(id -u)" -v "$(pwd):/srv/www" -w /srv/www -it public.ecr.aws/unocha/unified-builder:8.0-stable sh -c "composer -v update drupal/${module_name} --with-all-dependencies"
       return;;
   esac
 
@@ -238,13 +213,68 @@ test_on_stage () {
   echo "There's a list of links to test at $testing_urls"
   echo "Ask the content squad for help testing key pages."
   echo "After testing, check ELK for any errors or warnings which might not have been immediately obvious (or otherwise visible) to the content squad."
-# Linux copy to both the selection buffer and clipboard with xclip.
+  # Linux copy to both the selection buffer and clipboard with xclip.
   ( command -v xclip >/dev/null 2>&1 ) &&
     echo "$testing_urls" | xclip -i -sel c -f |xclip -i -sel p &&
     echo "Testing urls spreadsheet link copied to clipboard"
   echo "@todo open jenkins log-in pages for each dev site."
   echo "@todo open elk links filtered by each dev site."
+  # Use open_urls.sh to open urls for each repo in list on dev environment.
+  while IFS= read -r -u 3 repo ; do
+    # Skip blank lines and commented lines.
+    case "$repo" in ''|\#*) continue ;; esac
+    echo "Opening testing urls for $repo"
+
+    # Match repo name to shortname.
+    case $repo in
+      "assessmentregistry8-site" )
+        echo "Matched assessments"
+        short_name="ar" ;;
+      "common-design-site" )
+        short_name="cd" ;;
+      "cerf8" )
+        short_name="cerf" ;;
+      "docstore-site" )
+        echo "No testing urls for docstore site, continuing"
+        continue;;
+      "gho-2022-site" )
+        short_name="gho" ;;
+      "gms-site" )
+        short_name="gms" ;;
+      "iasc8" )
+        short_name="iasc" ;;
+      "odsg8-site" )
+        short_name="odsg" ;;
+      "response-site" )
+        short_name="response" ;;
+      "rwint9-site" )
+        short_name="rwint" ;;
+      "slt8-site" )
+        short_name="slt" ;;
+      "sesame-site" )
+        short_name="Sesame" ;;
+      "whd-2022-site" )
+        short_name="whd" ;;
+      *) echo "Couldn't match ${repo} to a Jenkins property. Please check this."
+    esac
+
+    testing_urls_name="${short_name}-dev.txt"
+# Linux open link in browser.
+    ./open_urls.sh "test_urls/${testing_urls_name}"
+
+    wait_to_continue
+
+  done 3< repolist.txt
+
   echo "@todo include VRT to check for differences"
+# TODO: run VRT for each site. Assume we already have reference.
+# Repolist. Foreach: Start with just anon.
+# This for AR - note new directory for each - what else can be abstracted
+# and standardized?
+# docker run --shm-size 512m --rm --net="host" --name reference --entrypoint npm -e REF_URI=https://www.unocha.org/ -e URLS_ANON=uno_anon.txt -v "$(pwd):/srv" -v "$(pwd)/data/uno:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run reference-anon
+# docker run --shm-size 512m --rm --net="host" --name test --entrypoint npm -e TEST_URI=https://ocha:dev@dev.unocha-org.ahconu.org/ -e URLS_ANON=uno_anon.txt -v "$(pwd):/srv" -v "$(pwd)/data/uno:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run test-anon
+
+
 }
 
 create_pr () {
@@ -316,8 +346,6 @@ create_pr () {
 
     set_new_branch
     wait_to_continue
-
-    check_php_version
 
     case $update_type in
       "core" | "contrib")
@@ -427,7 +455,7 @@ prod_deploy () {
         stack_name="gho-2022-stack"
         jenkins_name="GHO 2022"
         jenkins_other_name="gho-2022" ;;
-      "gms-unocha-org" )
+      "gms-site" )
         stack_name="gms-stack"
         jenkins_name="GMS"
         jenkins_other_name="gms" ;;
@@ -439,6 +467,14 @@ prod_deploy () {
         stack_name="odsg-stack"
         jenkins_name="ODSG"
         jenkins_other_name="odsg" ;;
+      "response-site" )
+        stack_name="response-stack"
+        jenkins_name="Response"
+        jenkins_other_name="response" ;;
+      "rwint9-site" )
+        stack_name="rwint-stack"
+        jenkins_name="ReliefWeb"
+        jenkins_other_name="rwint-site" ;;
       "slt8-site" )
         stack_name="slt-stack"
         jenkins_name="SLT"
@@ -446,6 +482,10 @@ prod_deploy () {
       "sesame-site" )
         jenkins_name="Sesame"
         jenkins_other_name="sesame" ;;
+      "whd-2022-site" )
+        stack_name="whd-stack"
+        jenkins_name="WHD"
+        jenkins_other_name="whd" ;;
       *) echo "Couldn't match ${repo} to a Jenkins property. Please check this."
     esac
     xdg-open "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-prod-login-url/build"
