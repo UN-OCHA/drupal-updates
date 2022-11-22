@@ -6,6 +6,19 @@
 
 # CSVs should be uploaded to: https://docs.google.com/spreadsheets/d/1iMSJE5Lhk86m0lBWLE1R64QFGxZhFUfmconmmyu3XAU/edit#gid=335219432
 
+set -e
+
+function requires() {
+    if ! command -v $1 &>/dev/null; then
+        echo "Requires $1"
+        exit 1
+    fi
+}
+
+requires "composer"
+requires "curl"
+requires "xmllint"
+
 # Get type of update.
 echo "Choose whether to output a full list of modules or just the outdated ones"
 echo "NB - outdated assumes \`composer install\` has been run in each repo on"
