@@ -28,11 +28,13 @@ select type in "${options[@]}"; do
   case $type in
     "1 for full list")
       option=""
+      fields="1,2"
       output_file="modulelist.txt"
 
       break;;
     "2 for outdated ones only")
       option="-o"
+      fields="1,2,3,4"
       output_file="outdatedlist.txt"
 
       break;;
@@ -56,21 +58,28 @@ while IFS= read -r -u 3 repo ; do
   # Skip blank lines and commented lines.
   case "$repo" in ''|\#*) continue ;; esac
   spacer+=","
-  for module in $(composer show $option -d "${full_path}/${repo}" -N drupal/* \
-    | tr -d " " | cut -f 2 -d '/'); do
-    if grep "${module}," $output_file; then
+  for module_details in $(composer show $option -d "${full_path}/${repo}" drupal/* \
+    | tr -s " " | cut -f $fields -d ' ' --output-delimiter="," | cut -d '/' -f 2 ); do
+    module_name=$(echo "$module_details" | cut -d ',' -f 1 )
+    if grep "${module_name}," $output_file; then
       # Already in the list - add repo to line.
-      awk -v pattern="${module}," -v repo="$repo" \
+      awk -v pattern="${module_name}," -v repo="$repo" \
         '{if ($0 ~ pattern) print $0 repo; else print $0 }' $output_file \
         > tmpfile.txt && mv tmpfile.txt $output_file
     else
-      # TODO: check if the module is in composer.patches.json. For now, just
-      # the first time it's included.
+      # TODO: check if the module is in composer.patches.json.
 
       # Add new module with its maintenance status.
-      url="https://updates.drupal.org/release-history/${module}/current"
-      status=$(curl "$url" | xmllint --xpath "//project/terms/term[name='Maintenance status']/value/text()" -)
-      echo "${module},${status:=Not specified},${spacer}${repo}" >> $output_file
+      url="https://updates.drupal.org/release-history/${module_name}/current"
+      release_history=$(curl "$url")
+      if [[ "$release_history" == *"<error>No release history"* ]]; then
+        maintenance="No release history"
+        covered="No release history"
+      else
+        maintenance=$(echo "$release_history" | xmllint --xpath "//project/terms/term[name='Maintenance status']/value/text()" -)
+        covered=$(echo "$release_history" | xmllint --xpath "(//project/releases/release/security/text())[1]" -)
+      fi
+      echo "${module_details},${maintenance:=No maintenance status specified},${covered:=No security coverage specified}${spacer}${repo}" >> $output_file
     fi
   done
   # Add a trailing comma to each line.
