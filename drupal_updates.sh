@@ -237,12 +237,12 @@ test_on_stage () {
       "docstore-site" )
         echo "No testing urls for docstore site, continuing"
         continue;;
-      "gho-2022-site" )
-        short_name="gho" ;;
       "gms-site" )
         short_name="gms" ;;
       "iasc8" )
         short_name="iasc" ;;
+      "numbers" )
+        short_name="numbers" ;;
       "odsg8-site" )
         short_name="odsg" ;;
       "response-site" )
@@ -451,10 +451,6 @@ prod_deploy () {
         stack_name="docstore-stack"
         jenkins_name="Docstore"
         jenkins_other_name="docstore" ;;
-      "gho-2022-site" )
-        stack_name="gho-2022-stack"
-        jenkins_name="GHO 2022"
-        jenkins_other_name="gho-2022" ;;
       "gms-site" )
         stack_name="gms-stack"
         jenkins_name="GMS"
@@ -463,6 +459,10 @@ prod_deploy () {
         stack_name="iasc-stack"
         jenkins_name="IASC"
         jenkins_other_name="iasc" ;;
+      "numbers-site" )
+        stack_name="numbers-stack"
+        jenkins_name="Numbers"
+        jenkins_other_name="numbers" ;;
       "odsg8-site" )
         stack_name="odsg-stack"
         jenkins_name="ODSG"
