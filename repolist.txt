@@ -12,6 +12,7 @@ assessmentregistry8-site
 cerf8
 common-design-site
 docstore-site
+drupal-starterkit
 gms-site
 iasc8
 numbers-site
@@ -20,11 +21,17 @@ response-site
 rwint9-site
 slt8-site
 sesame-site
-whd-2022-site
+unocha-site
+
+# whd
+
+# # D7 sites
+hrinfo-site
+unocha-org
+
+# Now static
 # indicatorregistry8-site
 # pocam8-site
-
-# Remember too hrinfo and unocha-org.
 
 # URLs for reference:
 # https://assessments.hpc.tools/
@@ -39,11 +46,8 @@ whd-2022-site
 # https://dev.interagencystandingcommittee-org.ahconu.org/
 # https://odsg.unocha.org/
 # https://dev.odsg-unocha-org.ahconu.org/
-#
-#
 # https://reliefweb.int/
 # https://dev.reliefweb-int.ahconu.org
 # https://savinglivestogether.unocha.org/welcome?destination=/saving-lives-together
 # http://dev.savinglivestogether-unocha-org.ahconu.org/welcome?destination=/saving-lives-together
 # auth.ahconu.org
-# 
