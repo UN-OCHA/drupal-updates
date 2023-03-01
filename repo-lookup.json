@@ -1,0 +1,121 @@
+{
+  "assessmentregistry8-site": {
+    "elk_name": "assessments",
+    "stack_name": "assessmentregistry-stack",
+    "php_version": "8.0",
+    "jenkins_name": "Assessments",
+    "jenkins_other_name": "assessments"
+  },
+  "cerf8": {
+    "elk_name": "cerf",
+    "stack_name": "cerf-stack",
+    "php_version": "8.0",
+    "jenkins_name": "CERF",
+    "jenkins_other_name": "cerf"
+  },
+  "common-design-site": {
+    "elk_name": "commondesign",
+    "stack_name": "common-design-stack",
+    "php_version": "8.0",
+    "jenkins_name": "Common Design",
+    "jenkins_other_name": "ds-commondesign"
+  },
+  "docstore-site": {
+    "elk_name": "docstore",
+    "stack_name": "docstore-stack",
+    "php_version": "8.0",
+    "jenkins_name": "Docstore",
+    "jenkins_other_name": "docstore"
+  },
+  "drupal-starterkit": {
+    "elk_name": "n/a",
+    "stack_name": "n/a",
+    "php_version": "8.1",
+    "jenkins_name": "n/a",
+    "jenkins_other_name": "n/a"
+  },
+  "gms-site": {
+    "elk_name": "gms",
+    "stack_name": "gms-stack",
+    "php_version": "8.0",
+    "jenkins_name": "GMS",
+    "jenkins_other_name": "gms"
+  },
+  "hrinfo-site": {
+    "elk_name": "hrinfo",
+    "stack_name": "hrinfo-stack",
+    "php_version": "7.4",
+    "jenkins_name": "HR.info",
+    "jenkins_other_name": "hrinfo"
+  },
+  "iasc8": {
+    "elk_name": "iasc",
+    "stack_name": "iasc-stack",
+    "php_version": "8.0",
+    "jenkins_name": "IASC",
+    "jenkins_other_name": "iasc"
+  },
+  "numbers-site": {
+    "elk_name": "numbers",
+    "stack_name": "numbers-stack",
+    "php_version": "8.1",
+    "jenkins_name": "Numbers",
+    "jenkins_other_name": "numbers"
+  },
+  "odsg8-site": {
+    "elk_name": "odsg",
+    "stack_name": "odsg-stack",
+    "php_version": "8.0",
+    "jenkins_name": "ODSG",
+    "jenkins_other_name": "odsg"
+  },
+  "response-site": {
+    "elk_name": "response",
+    "stack_name": "response-stack",
+    "php_version": "8.1",
+    "jenkins_name": "Response",
+    "jenkins_other_name": "response"
+  },
+  "rwint9-site": {
+    "elk_name": "rwint",
+    "stack_name": "rwint-stack",
+    "php_version": "8.0",
+    "jenkins_name": "ReliefWeb",
+    "jenkins_other_name": "rwint-site"
+  },
+  "slt8-site": {
+    "elk_name": "slt",
+    "stack_name": "slt-stack",
+    "php_version": "8.0",
+    "jenkins_name": "SLT",
+    "jenkins_other_name": "slt"
+  },
+  "sesame-site": {
+    "elk_name": "sesame",
+    "stack_name": "sesame-stack",
+    "php_version": "8.0",
+    "jenkins_name": "Sesame",
+    "jenkins_other_name": "sesame"
+  },
+  "unocha-org": {
+    "elk_name": "unochaorg",
+    "stack_name": "unochaorg-stack",
+    "php_version": "8.0",
+    "jenkins_name": "UNOCHA D7",
+    "jenkins_other_name": "unochaorg"
+  },
+  "unocha-site": {
+    "elk_name": "unocha",
+    "stack_name": "unocha-stack",
+    "php_version": "8.2",
+    "jenkins_name": "UN-OCHA D10",
+    "jenkins_other_name": "unocha"
+  },
+  "whd-2022-site": {
+    "elk_name": "whd",
+    "stack_name": "whd-stack",
+    "php_version": "8.0",
+    "jenkins_name": "WHD",
+    "jenkins_other_name": "whd"
+  }
+}
