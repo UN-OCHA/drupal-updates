@@ -2,9 +2,6 @@
 
 # Gets a list of drupal modules in csv form showing repos they're used in.
 # TODO: make it work with other OSs.
-# TODO: Consider checking out 'main' branch so it reflects what's deployed.
-
-# CSVs should be uploaded to the relevant sheet on: https://docs.google.com/spreadsheets/d/1iMSJE5Lhk86m0lBWLE1R64QFGxZhFUfmconmmyu3XAU/edit
 
 source ./common.sh
 
@@ -40,16 +37,17 @@ for type in "${options[@]}"; do
     output_file="data/${vendor}-${base_output_file}"
     echo "$first_line" > "$output_file"
     for repo in "${repolist[@]}" ; do
-      spacer+=","
+      spacer+=";"
       for module_details in $(composer show $option -d "${full_path}/${repo}" "${packages}" \
-        | tr -s " " | cut -f $fields -d ' ' --output-delimiter="," | cut -d '/' -f 2 ); do
-        module_name=$(echo "$module_details" | cut -d ',' -f 1 )
-        if grep "${module_name}," "$output_file"; then
+        | tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2 ); do
+        module_name=$(echo "$module_details" | cut -d ';' -f 1 )
+        if grep "${module_name};" "$output_file"; then
           # Already in the list - add repo to line.
-          awk -v pattern="${module_name}," -v repo="$repo" \
+          awk -v pattern="${module_name};" -v repo="$repo" \
             '{if ($0 ~ pattern) print $0 repo; else print $0 }' "$output_file" \
             > tmpfile.txt && mv tmpfile.txt "$output_file"
         else
+          count_formula="=COUNTA(INDIRECT(ADDRESS(ROW(),COLUMN()+1,4)):INDIRECT(ADDRESS(ROW(),COLUMN()+16,4)))"
           if [[ "$vendor" == "drupal" ]]; then
             # TODO: what information about patches could be useful?
             if grep "drupal/${module_name}\":" "${full_path}/${repo}/composer.patches.json"; then
@@ -68,14 +66,14 @@ for type in "${options[@]}"; do
               maintenance=$(echo "$release_history" | xmllint --xpath "//project/terms/term[name='Maintenance status']/value/text()" -)
               covered=$(echo "$release_history" | xmllint --xpath "(//project/releases/release/security/text())[1]" - | sed "s/overed/overed#/" | cut -d'#' -f1 )
             fi
-            echo "${module_details},${patched},${maintenance:=No maintenance status specified},${covered:=No security coverage specified}${spacer}${repo}" >> "$output_file"
+            echo "${module_details};${patched};${maintenance:=No maintenance status specified};${covered:=No security coverage specified};${count_formula}${spacer}${repo}" >> "$output_file"
           else
-            echo "${module_details}${spacer}${repo}" >> "$output_file"
+            echo "${module_details};${count_formula}${spacer}${repo}" >> "$output_file"
           fi
         fi
       done
-      # Add a trailing comma to each line.
-      awk '{print $0 ","}' "$output_file" > tmpfile.txt && mv tmpfile.txt "$output_file"
+      # Add a trailing semi-colon to each line.
+      awk '{print $0 ";"}' "$output_file" > tmpfile.txt && mv tmpfile.txt "$output_file"
     done;
 
     LC_COLLATE=C sort "$output_file" > tmpfile.txt && mv tmpfile.txt "$output_file"
@@ -88,3 +86,5 @@ spreadsheet_url="https://docs.google.com/spreadsheets/d/1iMSJE5Lhk86m0lBWLE1R64Q
 copy_to_clipboard "${spreadsheet_url}"
 
 echo "Spreadsheet url ${spreadsheet_url} copied to the clipboard. Use File > Import to update the relevant sheets."
+echo ""
+echo "Note that semi-colons are used to separate fields, you need to specify that as a custom separator when you upload each file."
