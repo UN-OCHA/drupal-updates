@@ -32,6 +32,6 @@ for repo in "${repolist[@]}" ; do
 
   cd - || exit
 
-  wait_to_continue
+  # wait_to_continue
 
 done;
