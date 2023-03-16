@@ -32,7 +32,7 @@ read -r ticket_number
 # Choose stage.
 # Get type of update.
 echo "Choose stage of updates"
-options=("create PR" "test on stage"  "merge to main" "create tags" "prod deploy")
+options=("create PR" "vrt comparison of prod and stage"  "merge to main" "create tags" "prod deploy")
 select stage in "${options[@]}"; do
   case $stage in
     "create PR")

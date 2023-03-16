@@ -61,13 +61,17 @@ update_branches () {
       continue
     fi
     echo "Updating $branch branch for $repo"
-    git checkout "$branch"
-    git pull
-    echo $?
-    if [[ $? == *"Aborting"* ]]; then
+    if ! git checkout "$branch"; then
+      echo $?
       echo "- - -"
-      echo "Fix the unmerged changes and try this step again"
-      return
+      echo "Fix the unmerged changes for ${repo} and try this step again"
+      exit
+    fi
+    if ! git pull; then 
+      echo $?
+      echo "- - -"
+      echo "Fix the unmerged changes for ${repo} and try this step again"
+      exit
     fi
   done
   echo "- - -"
@@ -85,9 +89,9 @@ need_a_feature_branch () {
   echo "(if it scrolls off the screen, scroll down with 'j' and hit 'q' to escape)"
   diff_output=$(git diff main --name-status)
   diff_length=$(wc -l <<<"$diff_output" | cut -d" " -f1)
-  if [ "$diff_length" -gt 20 ]; then
+  if [ "$diff_length" -gt 12 ]; then
     copy_to_clipboard "${remote_url}/${repo}/compare/main...develop"
-    echo "There are a lot of differences, visit ${remote_url}/${repo}/compare/main...develop (the url has been copied to the clipboard) to decide whether the changes are significant enough to warrant a feature branch to avoid deploying changes to develop that aren't yet ready"
+    echo "There are a number of differences, visit ${remote_url}/${repo}/compare/main...develop (the url has been copied to the clipboard) to decide whether the changes are significant enough to warrant a feature branch to avoid deploying changes to develop that aren't yet ready"
   else
     echo "$diff_output"
   fi
@@ -123,13 +127,6 @@ set_new_branch () {
   echo "creating new branch in $repo"
   git checkout -b "$branch_name"
 
-  # TODO: this isn't necessary is it? If so, cd back first to fix the path.
-  # php_version=$(jq -r '."'"$repo"'".php_version' < ./repo-lookup.json)
-
-  # echo "- - -"
-  # echo "- - -"
-  # echo "bringing composer up-to-date"
-  # docker run --rm -u "$(id -u)" -v "$(pwd):/srv/www" -w /srv/www -it "public.ecr.aws/unocha/unified-builder:${php_version}-stable" sh -c "composer install"
 }
 
 composer_update () {

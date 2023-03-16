@@ -86,7 +86,7 @@
   "slt8-site": {
     "elk_name": "slt",
     "stack_name": "slt-stack",
-    "php_version": "8.0",
+    "php_version": "8.2",
     "jenkins_name": "SLT",
     "jenkins_other_name": "slt"
   },
