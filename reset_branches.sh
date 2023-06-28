@@ -9,7 +9,7 @@ wait_to_continue
 
 for repo in "${repolist[@]}" ; do
 
-  php_version=$(jq -r '."'"$repo"'".php_version' < ./repo-lookup.json)
+  docker_image=$(awk '/FROM/ {print $2; exit 1}' "${full_path}/${repo}/docker/Dockerfile")
 
   echo "- - -"
   echo " --- "
@@ -28,7 +28,8 @@ for repo in "${repolist[@]}" ; do
 
   echo "Installing composer packages for $repo"
 
-  docker run --rm -u 1000 -v "$(pwd):/srv/www" -w /srv/www "public.ecr.aws/unocha/unified-builder:${php_version}-stable" composer install
+  # Get the docker image from docker/Dockerfile
+  docker run --rm -u 1000 -v "$(pwd):/srv/www" -w /srv/www "${docker_image}" composer install
 
   cd - || exit
 

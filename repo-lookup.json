@@ -93,7 +93,7 @@
   "sesame-site": {
     "elk_name": "sesame",
     "stack_name": "sesame-stack",
-    "php_version": "8.0",
+    "php_version": "8.1",
     "jenkins_name": "Sesame",
     "jenkins_other_name": "sesame"
   },

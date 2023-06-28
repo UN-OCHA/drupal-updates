@@ -18,7 +18,7 @@ echo "NB - outdated assumes \`composer install\` has been run in each repo on"
 echo "your local directories, use 'reset_branches.sh' to prepare all repos."
 
 printf -v date '%(%Y-%m-%d)T' -1
-first_line="Last updated: ${date}. Note we only check if a module is patched in the first repo it is added for."
+first_line="Last updated: ${date}. Note we only check if a module is patched or pinned in the first repo it is added for."
 options=("full" "outdated")
 for type in "${options[@]}"; do
   if [[ "$type" == "full" ]]; then
@@ -50,10 +50,17 @@ for type in "${options[@]}"; do
           count_formula="=COUNTA(INDIRECT(ADDRESS(ROW(),COLUMN()+1,4)):INDIRECT(ADDRESS(ROW(),COLUMN()+16,4)))"
           if [[ "$vendor" == "drupal" ]]; then
             # TODO: what information about patches could be useful?
+            # Add patch information.
             if grep "drupal/${module_name}\":" "${full_path}/${repo}/composer.patches.json"; then
               patched="Patched"
             else
               patched=" - "
+            fi
+            # Add pin information.
+            if grep "drupal/${module_name}\": \"[[:digit:]]" "${full_path}/${repo}/composer.json"; then
+              pinned="Pinned"
+            else
+              pinned=" - "
             fi
 
             # Add new module with its maintenance status.
@@ -66,7 +73,7 @@ for type in "${options[@]}"; do
               maintenance=$(echo "$release_history" | xmllint --xpath "//project/terms/term[name='Maintenance status']/value/text()" -)
               covered=$(echo "$release_history" | xmllint --xpath "(//project/releases/release/security/text())[1]" - | sed "s/overed/overed#/" | cut -d'#' -f1 )
             fi
-            echo "${module_details};${patched};${maintenance:=No maintenance status specified};${covered:=No security coverage specified};${count_formula}${spacer}${repo}" >> "$output_file"
+            echo "${module_details};${patched};${pinned};${maintenance:=No maintenance status specified};${covered:=No security coverage specified};${count_formula}${spacer}${repo}" >> "$output_file"
           else
             echo "${module_details};${count_formula}${spacer}${repo}" >> "$output_file"
           fi
