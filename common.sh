@@ -53,25 +53,18 @@ copy_to_clipboard () {
 update_branches () {
   branches=( "main" "develop" )
   for branch in "${branches[@]}"; do
-    if [ "$repo" == "drupal-starterkit" ] && [ "$branch" == "develop" ]; then
-      continue
-    fi
-    # TODO: still in development - remove when it's launched.
-    if [ "$repo" == "unocha-site" ] && [ "$branch" == "main" ]; then
-      continue
-    fi
     echo "Updating $branch branch for $repo"
     if ! git checkout "$branch"; then
       echo $?
       echo "- - -"
       echo "Fix the unmerged changes for ${repo} and try this step again"
-      exit
+      return 1
     fi
     if ! git pull; then 
       echo $?
       echo "- - -"
       echo "Fix the unmerged changes for ${repo} and try this step again"
-      exit
+      return 1
     fi
   done
   echo "- - -"
@@ -80,24 +73,21 @@ update_branches () {
 }
 
 need_a_feature_branch () {
-  echo "- - -"
-  echo "- - -"
   echo "checking feature branch for $repo"
-  echo "- - -"
-  echo "- - -"
-  echo "start of output of 'git diff main --name-status'"
-  echo "(if it scrolls off the screen, scroll down with 'j' and hit 'q' to escape)"
   diff_output=$(git diff main --name-status)
   diff_length=$(wc -l <<<"$diff_output" | cut -d" " -f1)
+  echo "* * *"
+  echo "There are $diff_length files changed between main and develop."
+  echo "* * *"
   if [ "$diff_length" -gt 12 ]; then
-    copy_to_clipboard "${remote_url}/${repo}/compare/main...develop"
-    echo "There are a number of differences, visit ${remote_url}/${repo}/compare/main...develop (the url has been copied to the clipboard) to decide whether the changes are significant enough to warrant a feature branch to avoid deploying changes to develop that aren't yet ready"
-  else
+    open_url "${remote_url}/${repo}/compare/main...develop"
+    echo "Visit ${remote_url}/${repo}/compare/main...develop (the url has been opened in the browser) to decide whether the changes are significant enough to warrant a feature branch to avoid deploying changes to develop that aren't yet ready"
+  elif [ "$diff_length" -gt 0 ]; then
+    echo "- - -"
     echo "$diff_output"
+    echo "- - -"
+    echo "Decide whether the changes are significant enough to warrant a feature branch to avoid deploying changes to develop that aren't yet ready"
   fi
-  echo "- - -"
-  echo "- - -"
-  echo "output finished."
   wait_to_continue
 
   # Reset branch name in case it has been changed.
@@ -129,38 +119,10 @@ set_new_branch () {
 
 }
 
-composer_update () {
-
-  php_version=$(jq -r '."'"$repo"'".php_version' < ./repo-lookup.json)
-
-  case $update_type in
-    "core")
-      echo "- - -"
-      echo "- - -"
-      echo "updating core for $repo"
-      echo "will run 'docker run --rm -u \"$(id -u)\" -v \"$(pwd):/srv/www\" -w /srv/www -it public.ecr.aws/unocha/unified-builder:${php_version}-stable sh -c \"composer -v update drupal/core-* --with-all-dependencies\"'"
-      echo "- - -"
-      echo "- - -"
-      docker run --rm -u "$(id -u)" -v "$(pwd):/srv/www" -w /srv/www -it "public.ecr.aws/unocha/unified-builder:${php_version}-stable" sh -c "composer -v update drupal/core-* --with-all-dependencies"
-      return;;
-    "contrib")
-      echo "- - -"
-      echo "- - -"
-      echo "updating ${module_name} for $repo"
-      echo "will run 'docker run --rm -u \"$(id -u)\" -v \"$(pwd):/srv/www\" -w /srv/www -it public.ecr.aws/unocha/unified-builder:${php_version}-stable sh -c \"composer -v update drupal/${module_name} --with-all-dependencies\"'"
-      echo "- - -"
-      echo "- - -"
-      docker run --rm -u "$(id -u)" -v "$(pwd):/srv/www" -w /srv/www -it "public.ecr.aws/unocha/unified-builder:${php_version}-stable" sh -c "composer -v update drupal/${module_name} --with-all-dependencies"
-      return;;
-  esac
-
-}
-
 check_and_add_changes () {
   echo "- - -"
   echo "- - -"
-  echo "in another tab/ window, 'cd ${full_path}/${repo}', check the changes are all as you'd expect and 'git add' them to the ${branch_name} branch of ${repo}"
-  copy_to_clipboard "cd ${full_path}/${repo}"
+  echo "In another tab/ window, 'cd ${full_path}/${repo}', make any changes necessary and 'git add' them to the ${branch_name} branch of ${repo}"
   echo "CD command: 'cd ${full_path}/${repo}' copied to clipboard"
   echo "- - -"
   echo "- - -"
@@ -176,35 +138,12 @@ commit_changes () {
   echo "- - -"
   wait_to_continue
 
-  case $update_type in
-    "core")
-      echo "- - -"
-      echo "- - -"
-      echo "committing core update"
-      echo "- - -"
-      echo "- - -"
-      new_version=$(composer show -f json drupal/core-recommended | jq .versions[] | sed s/\"//g)
-      git commit -m "chore: update ${update_type} to ${new_version}" -m "Refs: ${ticket_number}"
-      return;;
-    "contrib")
-      echo "- - -"
-      echo "- - -"
-      echo "committing contrib update"
-      echo "- - -"
-      echo "- - -"
-      new_version=$(composer show -f json "drupal/${module_name}" | jq .versions[] | sed s/\"//g)
-      git commit -m "chore: update ${module_name} module to ${new_version}" -m "Refs: ${ticket_number}"
-      return;;
-    "other")
-      echo "- - -"
-      echo "- - -"
-      echo "committing changes"
-      echo "- - -"
-      echo "- - -"
-      read -r -p "enter one-line commit message, including the standard commit type, the ticket number will be added on another line: " commit_message
-      git commit -m "${commit_message}" -m "Refs: ${ticket_number}"
-      return;;
-  esac
+  echo "- - -"
+  echo "- - -"
+  echo "committing changes"
+  echo "- - -"
+  echo "- - -"
+  git commit -m "${commit_message}" -m "Refs: ${ticket_number}"
 
 }
 
@@ -215,9 +154,11 @@ push_changes () {
   echo "- - -"
   echo "- - -"
   git push -u origin "$branch_name"
-  echo "Create pull request at link above"
-  copy_to_clipboard "[${ticket_number}] ${update_type} update"
-  echo "PR title: '[${ticket_number}] ${update_type} update' copied to clipboard"
+  pr_url=${remote_url}/${repo}/pull/new/${branch_name}
+  echo "Opening url for PR: $pr_url"
+  open_url "${pr_url}"
+  echo "Reverting to develop branch"
+  git checkout develop
 
 }
 
@@ -268,7 +209,9 @@ vrt_report () {
 
   cd ../tools-vrt || exit
 
-  statuses=( 'anon' 'auth' )
+  # TODO revise VRT logins so it works with authenticated users too.
+  # statuses=( 'anon' 'auth' )
+  statuses=( 'anon' )
   for status in "${statuses[@]}" ; do
     file="file://$(pwd)/data/${repo}/${status}/html_report/index.html"
     echo "Opening $file in browser"
@@ -287,78 +230,34 @@ vrt_report () {
 
 create_pr () {
   ticket_number="$1"
-  # Get type of update.
-  # TODO: This was set up before the periodic updates - the core/contrib/other
-  # divide no longer makes much sense. Re-work for PRs that should be made
-  # for multiple repos.
-  echo "Choose type of update"
-  options=("core" "contrib" "other")
-  select update_type in "${options[@]}"; do
-    case $update_type in
-      "core" | "other")
-        break;;
-      "contrib")
-        #get list of repos with this module in the composer json.
-        read -r -p "module name to update: " module_name
 
-        contrib_repolist=()
+  echo "Enter branch name (without the ticket number):"
+  read -r branch_name
+  branch_name=$(echo "${ticket_number}-${branch_name}" | tr ' ' '-')
 
-        for repo in "${repolist[@]}" ; do
-          if composer show -q -d "${full_path}/${repo}" -o "drupal/${module_name}"
-          then
-            contrib_repolist+=("$repo")
-          fi
-        done;
-        repolist=( "${contrib_repolist[@]}" )
-
-        break;;
-      *) echo "invalid option ${REPLY}. Please choose a number."
-    esac
-  done
-
-  echo "Repos to be updated: "
-  printf '%s\n' "${repolist[@]}"
-  wait_to_continue
-
-  case $update_type in
-    "core")
-      branch_name="${ticket_number}-${update_type}-update";;
-    "contrib")
-      branch_name="${ticket_number}-${module_name}-module-update";;
-    "other")
-      echo "Enter branch name (without the ticket number):"
-      read -r branch_name
-      branch_name="${ticket_number}-${branch_name}";;
-  esac
+  read -r -p "Enter a one-line commit message, including the standard commit type (without the ticket number):" commit_message
 
   for repo in "${repolist[@]}" ; do
 
-    echo "- - -"
-    echo " --- "
-    echo "- - -"
+    echo "* * *"
     echo "Processing repo $repo"
+    echo "* * *"
 
     echo "cd-ing to the $repo repo"
     cd "${full_path}/${repo}" || exit
 
-    update_branches
+    update_branches || (echo "Failed to update branches due to a merge conflict. In another tab/ window, 'cd ${full_path}/${repo}', and manually update the develop and main branches." && \
+    copy_to_clipboard "cd ${full_path}/${repo}" && \
+    echo "CD command: 'cd ${full_path}/${repo}' copied to clipboard")
     wait_to_continue
 
     need_a_feature_branch
 
     set_new_branch
-    wait_to_continue
-
-    case $update_type in
-      "core" | "contrib")
-        composer_update
-        wait_to_continue
-    esac
 
     check_and_add_changes
 
     commit_changes
-    wait_to_continue
 
     push_changes
     wait_to_continue

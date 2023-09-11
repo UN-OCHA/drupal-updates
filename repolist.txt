@@ -3,7 +3,7 @@
 
 # The stages:
 # 1. create PR
-# 2. test on stage
+# 2. vrt comparison of prod and stage
 # 3. merge to main
 # 4. create tags
 # 5. prod deploy
@@ -17,21 +17,20 @@ gms-site
 iasc8
 numbers-site
 odsg8-site
+pocam8-site
 response-site
 rwint9-site
 slt8-site
 sesame-site
 unocha-site
 
-# whd
+# whd-2023-site
 
-# # D7 sites
-hrinfo-site
-unocha-org
+# # D7 site
+# hrinfo-site
 
 # Now static
 # indicatorregistry8-site
-# pocam8-site
 
 # URLs for reference:
 # https://assessments.hpc.tools/

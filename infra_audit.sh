@@ -10,7 +10,7 @@ source ./common.sh
 
 printf -v date '%(%Y-%m-%d)T' -1
 echo "Last updated: ${date}." > data/infralist.csv
-echo "Repo name,PHP version from dockerfile,PHP version in repo-lookup.json,Solr version,Varnish version," >> data/infralist.csv
+echo "Repo name,PHP version from dockerfile,Drupal core version,Solr version,Varnish version," >> data/infralist.csv
 
 for repo in "${repolist[@]}"; do
 
@@ -25,14 +25,10 @@ for repo in "${repolist[@]}"; do
   message+=,
   message+=$(tac "${full_path}/${repo}/docker/Dockerfile" | grep k8s -m 1 | awk -F'/' '{print $NF}' | cut -d":" -f 2-)
   message+=,
-  message+=$(jq -r '."'"$repo"'".php_version' < ./repo-lookup.json)
-  message+=,
+  message+=$(grep -A1 '"name": "drupal/core",' "${full_path}/${repo}/composer.lock" | grep -v 'name' | cut -d":" -f 2)
   message+=$(grep 'image: solr' "${full_path}/${stack_name}/common.yml" | awk '{print $NF}')
   message+=,
   message+=$(grep 'unocha/varnish' "${full_path}/${stack_name}/common.yml" | awk -F'/' '{print $NF}')
-  message+=,
-  workflows=$(grep 'php-version' "${full_path}/${repo}"/.github/workflows/* | awk -F'/' -v ORS="," '{print $NF}' | sed -e 's/php-version://g' )
-  message+=$workflows
   message+=,
 
   echo "$message" >> data/infralist.csv
