@@ -28,7 +28,6 @@ for repo in "${repolist[@]}" ; do
 
   echo "Installing composer packages for $repo"
 
-  # Get the docker image from docker/Dockerfile
   docker run --rm -u 1000 -v "$(pwd):/srv/www" -w /srv/www "${docker_image}" composer install
 
   cd - || exit
