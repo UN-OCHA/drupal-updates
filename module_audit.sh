@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Gets a list of drupal modules in csv form showing repos they're used in.
-# TODO: make it work with other OSs.
 
 source ./common.sh
 
@@ -18,8 +17,9 @@ echo "NB - outdated assumes \`composer install\` has been run in each repo on"
 echo "your local directories, use 'reset_branches.sh' to prepare all repos."
 
 printf -v date '%(%Y-%m-%d)T' -1
-first_line="Last updated: ${date}. Note we only check if a module is patched or pinned in the first repo it is added for."
+header_row="Last updated: ${date}. ; Maintenance status ; Security coverage ; Count "
 options=("full" "outdated")
+
 for type in "${options[@]}"; do
   if [[ "$type" == "full" ]]; then
     option=""
@@ -35,34 +35,44 @@ for type in "${options[@]}"; do
     spacer=""
     packages="${vendor}/*"
     output_file="data/${vendor}-${base_output_file}"
-    echo "$first_line" > "$output_file"
+    # Prepare header.
+    for repo in "${repolist[@]}" ; do
+      header_row="$header_row ; $repo"
+    done
+    echo "$header_row" > "$output_file"
+
     for repo in "${repolist[@]}" ; do
       spacer+=";"
       for module_details in $(composer show $option -d "${full_path}/${repo}" "${packages}" \
         | tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2 ); do
         module_name=$(echo "$module_details" | cut -d ';' -f 1 )
-        if grep "${module_name};" "$output_file"; then
+        module_version=$(echo "$module_details" | cut -d ';' -f 2 )
+        # Extra information.
+        extra=""
+        # Check if this module is the same as on main
+        cd "${full_path}/${repo}" || exit
+        git diff -w -U1 main composer.lock | tr '\n' ' ' > main.diff
+        if grep "drupal/${module_name}\",.*-.*\"version" main.diff; then
+          extra="$extra - Not as Main"
+        fi
+        rm main.diff
+        cd - || exit
+        # Add whether module is patched or pinned.
+        if grep "drupal/${module_name}\":" "${full_path}/${repo}/composer.patches.json"; then
+          extra="$extra - Patched"
+        fi
+        if grep "drupal/${module_name}\": \"[[:digit:]]" "${full_path}/${repo}/composer.json"; then
+          extra="$extra - Pinned"
+        fi
+        if grep "^${module_name};" "$output_file"; then
           # Already in the list - add repo to line.
-          awk -v pattern="${module_name};" -v repo="$repo" \
+          awk -v pattern="^${module_name};" -v repo="$module_version $extra" \
             '{if ($0 ~ pattern) print $0 repo; else print $0 }' "$output_file" \
             > tmpfile.txt && mv tmpfile.txt "$output_file"
         else
+          # Not yet in the list, add another line and relevant information.
           count_formula="=COUNTA(INDIRECT(ADDRESS(ROW(),COLUMN()+1,4)):INDIRECT(ADDRESS(ROW(),COLUMN()+16,4)))"
           if [[ "$vendor" == "drupal" ]]; then
-            # TODO: what information about patches could be useful?
-            # Add patch information.
-            if grep "drupal/${module_name}\":" "${full_path}/${repo}/composer.patches.json"; then
-              patched="Patched"
-            else
-              patched=" - "
-            fi
-            # Add pin information.
-            if grep "drupal/${module_name}\": \"[[:digit:]]" "${full_path}/${repo}/composer.json"; then
-              pinned="Pinned"
-            else
-              pinned=" - "
-            fi
-
             # Add new module with its maintenance status.
             url="https://updates.drupal.org/release-history/${module_name}/current"
             release_history=$(curl "$url")
@@ -73,9 +83,9 @@ for type in "${options[@]}"; do
               maintenance=$(echo "$release_history" | xmllint --xpath "//project/terms/term[name='Maintenance status']/value/text()" -)
               covered=$(echo "$release_history" | xmllint --xpath "(//project/releases/release/security/text())[1]" - | sed "s/overed/overed#/" | cut -d'#' -f1 )
             fi
-            echo "${module_details};${patched};${pinned};${maintenance:=No maintenance status specified};${covered:=No security coverage specified};${count_formula}${spacer}${repo}" >> "$output_file"
+            echo "${module_name};${maintenance:=No maintenance status specified};${covered:=No security coverage specified};${count_formula}${spacer}$module_version $extra" >> "$output_file"
           else
-            echo "${module_details};${count_formula}${spacer}${repo}" >> "$output_file"
+            echo "${module_name};;;${count_formula}${spacer}$module_version $extra" >> "$output_file"
           fi
         fi
       done
