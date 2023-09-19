@@ -9,16 +9,17 @@ requires "xmllint"
 
 echo ""
 echo ""
-echo "For updating the main spreadsheet, check that all D9+ modules are"
+echo "For updating the main spreadsheet, check that all D9+ repositories are"
 echo "uncommented in repolist.txt"
 echo ""
 echo ""
-echo "NB - outdated assumes \`composer install\` has been run in each repo on"
+echo "NB - this assumes \`composer install\` has been run in each repo on"
 echo "your local directories, use 'reset_branches.sh' to prepare all repos."
 
 printf -v date '%(%Y-%m-%d)T' -1
 header_row="Last updated: ${date}. ; Maintenance status ; Security coverage ; Count "
 options=("full" "outdated")
+current_directory="$(pwd)"
 
 for type in "${options[@]}"; do
   if [[ "$type" == "full" ]]; then
@@ -43,8 +44,16 @@ for type in "${options[@]}"; do
 
     for repo in "${repolist[@]}" ; do
       spacer+=";"
-      for module_details in $(composer show $option -d "${full_path}/${repo}" "${packages}" \
-        | tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2 ); do
+      echo "cd-ing to the $repo repo"
+      cd "${full_path}/${repo}" || exit
+      project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
+      docker compose -f local/docker-compose.yml up -d
+      docker exec -w /srv/www "${project_name}-site" composer show $option "${packages}" > "${current_directory}/tmp-module-list.txt"
+      docker compose -f local/docker-compose.yml down
+      cd - || exit
+      while IFS="" read -r module || [ -n "$module" ]
+      do module_details=$(echo "$module" | tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2 )
+        echo "$module_details"
         module_name=$(echo "$module_details" | cut -d ';' -f 1 )
         module_version=$(echo "$module_details" | cut -d ';' -f 2 )
         # Extra information.
@@ -64,6 +73,7 @@ for type in "${options[@]}"; do
         if grep "drupal/${module_name}\": \"[[:digit:]]" "${full_path}/${repo}/composer.json"; then
           extra="$extra - Pinned"
         fi
+
         if grep "^${module_name};" "$output_file"; then
           # Already in the list - add repo to line.
           awk -v pattern="^${module_name};" -v repo="$module_version $extra" \
@@ -88,7 +98,9 @@ for type in "${options[@]}"; do
             echo "${module_name};;;${count_formula}${spacer}$module_version $extra" >> "$output_file"
           fi
         fi
-      done
+      done < tmp-module-list.txt
+      # Clean up.
+      rm tmp-module-list.txt
       # Add a trailing semi-colon to each line.
       awk '{print $0 ";"}' "$output_file" > tmpfile.txt && mv tmpfile.txt "$output_file"
     done;
