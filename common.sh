@@ -11,11 +11,15 @@ requires () {
     fi
 }
 
-requires "composer"
 requires "docker"
 requires "git"
 
 source ./.env
+
+if test -f "./.env.local"; then
+  source ./.env.local
+fi
+
 remote_url=$REMOTE_URL
 full_path=$BASEDIR
 jenkins_url=$JENKINS_URL
@@ -94,7 +98,7 @@ need_a_feature_branch () {
   branch_name=$(echo "${branch_name}" | sed 's/feature\///')
 
   echo "Do we need a feature branch for $repo?"
-  options=("yes" "no")
+  options=("yes" "no, use main", "no, use develop")
   select feature_branch in "${options[@]}"; do
     case $feature_branch in
       "yes")
@@ -244,7 +248,13 @@ create_pr () {
     echo "* * *"
 
     echo "cd-ing to the $repo repo"
-    cd "${full_path}/${repo}" || exit
+    if test -d "${full_path}/${repo}"; then
+      cd "${full_path}/${repo}" || exit
+    else
+      cd "${full_path}" || exit
+      git clone git@github.com:UN-OCHA/${repo}.git
+      cd "${full_path}/${repo}" || exit
+    fi
 
     update_branches || (echo "Failed to update branches due to a merge conflict. In another tab/ window, 'cd ${full_path}/${repo}', and manually update the develop and main branches." && \
     copy_to_clipboard "cd ${full_path}/${repo}" && \
