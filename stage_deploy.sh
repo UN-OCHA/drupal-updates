@@ -8,21 +8,20 @@ jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.jso
 
 # Main routine
 main () {
+   # Copy production to staging
    restore_db
    deploy_prod_to_staging
    enable_stage_file_proxy
    run_cron
-   wait_to_continue
 
-   run_vrt_train
-   wait_to_continue
-
-   deploy_prod_to_staging
+   # Deploy main to staging
+   deploy_main_to_staging
    enable_stage_file_proxy
    run_cron
+
    wait_to_continue
 
-   run_vrt_test
+   trigger_vrt_job
 }
 
 # Restore production DB.
@@ -57,7 +56,7 @@ get_deployed_tag () {
 
 # Deploy production tag.
 deploy_prod_to_staging () {
-   local prodtag = get_deployed_tag
+   local prodtag=get_deployed_tag
    curl -X POST --user ${JENKINS_USER}:${JENKINS_TOKEN} \
       -H "Content-Type: application/x-www-form-urlencoded" \
       -d "DOCKER_TAG=${prodtag}&BACKUP=0"  \
@@ -99,7 +98,7 @@ run_vrt_train () {
 }
 
 # Deploy main tag.
-deploy_prod_to_staging () {
+deploy_main_to_staging () {
    local prodtag=get_deployed_tag
    curl -X POST --user ${JENKINS_USER}:${JENKINS_TOKEN} \
       -H "Content-Type: application/x-www-form-urlencoded" \
@@ -125,6 +124,18 @@ run_vrt_test () {
       -w /srv \
       public.ecr.aws/unocha/vrt:main \
       run test-anon
+}
+
+# Trigger VRT job and send list of URLs.
+trigger_vrt_job () {
+   local ref_uri="https://response.reliefweb.int"
+   local test_uri="https://ocha:dev@stage.response-reliefweb-int.ahconu.org"
+
+   curl -X POST --user ${JENKINS_USER}:${JENKINS_TOKEN} \
+      --form "REF_URI=${ref_uri}" \
+      --form "TEST_URI=${test_uri}"  \
+      --form "config/urls_anon.txt=@/home/peter/projects/un/tools-vrt/config/sites/response-site_anon.txt" \
+      "${jenkins_url}/job/vrt-anonymous/buildWithParameters"
 }
 
 main
