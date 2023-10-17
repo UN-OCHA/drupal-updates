@@ -4,7 +4,7 @@
     "stack_name": "assessmentregistry-stack",
     "jenkins_name": "Assessments",
     "jenkins_other_name": "assessments",
-    "prod_url": "",
+    "prod_url": "https://assessments.hpc.tools",
     "stage_url": ""
   },
   "cerf8": {
@@ -12,7 +12,7 @@
     "stack_name": "cerf-stack",
     "jenkins_name": "CERF",
     "jenkins_other_name": "cerf",
-    "prod_url": "",
+    "prod_url": "https://cerf.un.org/",
     "stage_url": ""
   },
   "common-design-site": {
@@ -20,7 +20,7 @@
     "stack_name": "common-design-stack",
     "jenkins_name": "Common Design",
     "jenkins_other_name": "ds-commondesign",
-    "prod_url": "",
+    "prod_url": "https://web.brand.unocha.org/",
     "stage_url": ""
   },
   "docstore-site": {
@@ -31,28 +31,12 @@
     "prod_url": "",
     "stage_url": ""
   },
-  "drupal-starterkit": {
-    "elk_name": "n/a",
-    "stack_name": "n/a",
-    "jenkins_name": "n/a",
-    "jenkins_other_name": "n/a",
-    "prod_url": "",
-    "stage_url": ""
-  },
   "gms-site": {
     "elk_name": "gms",
     "stack_name": "gms-stack",
     "jenkins_name": "GMS",
     "jenkins_other_name": "gms",
-    "prod_url": "",
-    "stage_url": ""
-  },
-  "hrinfo-site": {
-    "elk_name": "hrinfo",
-    "stack_name": "hrinfo-stack",
-    "jenkins_name": "HR.info",
-    "jenkins_other_name": "hrinfo",
-    "prod_url": "",
+    "prod_url": "https://gms.unocha.org/",
     "stage_url": ""
   },
   "iasc8": {
@@ -60,15 +44,7 @@
     "stack_name": "iasc-stack",
     "jenkins_name": "IASC",
     "jenkins_other_name": "iasc",
-    "prod_url": "",
-    "stage_url": ""
-  },
-  "numbers-site": {
-    "elk_name": "numbers",
-    "stack_name": "numbers-stack",
-    "jenkins_name": "Numbers",
-    "jenkins_other_name": "numbers",
-    "prod_url": "",
+    "prod_url": "https://interagencystandingcommittee.org/",
     "stage_url": ""
   },
   "odsg8-site": {
@@ -76,7 +52,7 @@
     "stack_name": "odsg-stack",
     "jenkins_name": "ODSG",
     "jenkins_other_name": "odsg",
-    "prod_url": "",
+    "prod_url": "https://odsg.unocha.org/",
     "stage_url": ""
   },
   "response-site": {
@@ -84,7 +60,7 @@
     "stack_name": "response-stack",
     "jenkins_name": "Response",
     "jenkins_other_name": "response",
-    "prod_url": "",
+    "prod_url": "https://response.reliefweb.int/",
     "stage_url": ""
   },
   "rwint9-site": {
@@ -92,7 +68,7 @@
     "stack_name": "rwint-stack",
     "jenkins_name": "ReliefWeb",
     "jenkins_other_name": "rwint-site",
-    "prod_url": "",
+    "prod_url": "https://reliefweb.int/",
     "stage_url": ""
   },
   "slt8-site": {
@@ -100,7 +76,7 @@
     "stack_name": "slt-stack",
     "jenkins_name": "SLT",
     "jenkins_other_name": "slt",
-    "prod_url": "",
+    "prod_url": "https://savinglivestogether.unocha.org",
     "stage_url": ""
   },
   "sesame-site": {
@@ -108,7 +84,7 @@
     "stack_name": "sesame-stack",
     "jenkins_name": "Sesame",
     "jenkins_other_name": "sesame",
-    "prod_url": "",
+    "prod_url": "https://sesame.ahconu.org/",
     "stage_url": ""
   },
   "unocha-site": {
@@ -116,7 +92,7 @@
     "stack_name": "unocha-stack",
     "jenkins_name": "UN-OCHA D10",
     "jenkins_other_name": "unocha",
-    "prod_url": "",
+    "prod_url": "https://www.unocha.org/",
     "stage_url": ""
   },
   "whd-2023-site": {
@@ -124,7 +100,7 @@
     "stack_name": "whd-stack",
     "jenkins_name": "WHD",
     "jenkins_other_name": "whd",
-    "prod_url": "",
+    "prod_url": "https://www.worldhumanitarianday.org/",
     "stage_url": ""
   }
 }
