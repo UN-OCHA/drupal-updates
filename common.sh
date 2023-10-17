@@ -11,11 +11,11 @@ requires () {
     fi
 }
 
-requires "composer"
 requires "docker"
 requires "git"
 
 source ./.env
+source ./.env.local
 remote_url=$REMOTE_URL
 full_path=$BASEDIR
 jenkins_url=$JENKINS_URL
@@ -198,7 +198,7 @@ run_vrt () {
   # statuses=( 'anon' 'auth' )
   statuses=( 'anon' )
   for status in "${statuses[@]}" ; do
-    docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run "${stage}"
+    docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:main run "${stage}"
   done
 
   cd - || exit

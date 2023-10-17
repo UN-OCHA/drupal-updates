@@ -2,26 +2,37 @@
 
 . ./common.sh
 
-repo="response-site"
-jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
-jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
-
 # Main routine
 main () {
-   # Copy production to staging
-   restore_db
-   deploy_prod_to_staging
-   enable_stage_file_proxy
-   run_cron
 
-   # Deploy main to staging
-   deploy_main_to_staging
-   enable_stage_file_proxy
-   run_cron
+  for repo in "${repolist[@]}" ; do
+    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
+    jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
+    prod_url=$(jq -r '."'"$repo"'".prod_url' < ./repo-lookup.json)
+    stage_url=$(jq -r '."'"$repo"'".stage_url' < ./repo-lookup.json)
 
-   wait_to_continue
+    if [[ $repo = "docstore-site" ]]
+    then
+      continue
+    fi
 
-   trigger_vrt_job
+    # Copy production to staging
+    restore_db
+    deploy_prod_to_staging
+    enable_stage_file_proxy
+    run_cron
+
+    # Deploy main to staging
+    deploy_main_to_staging
+    enable_stage_file_proxy
+    run_cron
+
+    wait_to_continue
+
+    trigger_vrt_job
+
+    vrt_report "$repo"
+  done;
 }
 
 # Restore production DB.
@@ -77,26 +88,6 @@ run_cron () {
       "${jenkins_url}/job/${jenkins_other_name}-stage-cron/build"
 }
 
-# Trigger VRT training.
-run_vrt_train () {
-   local url="https://ocha:dev@stage.response-reliefweb-int.ahconu.org"
-   cd ../tools-vrt || exit
-   cp config/sites/${repo}_anon.txt config/urls_anon.txt
-
-   docker run \
-      --shm-size 512m \
-      --rm \
-      --net="host" \
-      --name reference \
-      --entrypoint npm \
-      -e REF_URI=${url} \
-      -v "$(pwd)/data:/srv/data" \
-      -v "$(pwd)/config:/srv/config" \
-      -w /srv \
-      public.ecr.aws/unocha/vrt:main \
-      run reference-anon
-}
-
 # Deploy main tag.
 deploy_main_to_staging () {
    local prodtag=get_deployed_tag
@@ -106,35 +97,15 @@ deploy_main_to_staging () {
       "${jenkins_url}/job/${jenkins_other_name}-stage-deploy/buildWithParameters"
 }
 
-# Trigger VRT test.
-run_vrt_test () {
-   local url="https://ocha:dev@stage.response-reliefweb-int.ahconu.org"
-   cd ../tools-vrt || exit
-   cp config/sites/${repo}_anon.txt config/urls_anon.txt
-
-   docker run \
-      --shm-size 512m \
-      --rm \
-      --net="host" \
-      --name reference \
-      --entrypoint npm \
-      -e TEST_URI=${url} \
-      -v "$(pwd)/data:/srv/data" \
-      -v "$(pwd)/config:/srv/config" \
-      -w /srv \
-      public.ecr.aws/unocha/vrt:main \
-      run test-anon
-}
-
 # Trigger VRT job and send list of URLs.
 trigger_vrt_job () {
-   local ref_uri="https://response.reliefweb.int"
-   local test_uri="https://ocha:dev@stage.response-reliefweb-int.ahconu.org"
+   local ref_uri=prod_url
+   local test_uri=stage_url
 
    curl -X POST --user ${JENKINS_USER}:${JENKINS_TOKEN} \
       --form "REF_URI=${ref_uri}" \
       --form "TEST_URI=${test_uri}"  \
-      --form "config/urls_anon.txt=@/home/peter/projects/un/tools-vrt/config/sites/response-site_anon.txt" \
+      --form "config/urls_anon.txt=@../tools-vrt/config/sites/${repo}_anon.txt" \
       "${jenkins_url}/job/vrt-anonymous/buildWithParameters"
 }
 
