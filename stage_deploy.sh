@@ -4,7 +4,6 @@
 
 # Main routine
 main () {
-
   for repo in "${repolist[@]}" ; do
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
     jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
@@ -35,8 +34,6 @@ main () {
     fi
 
     trigger_vrt_job
-
-    vrt_report "$repo"
   done;
 }
 
