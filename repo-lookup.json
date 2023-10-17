@@ -5,7 +5,7 @@
     "jenkins_name": "Assessments",
     "jenkins_other_name": "assessments",
     "prod_url": "https://assessments.hpc.tools",
-    "stage_url": ""
+    "stage_url": "https://stage.assessments-hpc-tools.ahconu.org"
   },
   "cerf8": {
     "elk_name": "cerf",
@@ -13,7 +13,7 @@
     "jenkins_name": "CERF",
     "jenkins_other_name": "cerf",
     "prod_url": "https://cerf.un.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.cerf-un-org.ahconu.org/"
   },
   "common-design-site": {
     "elk_name": "commondesign",
@@ -21,7 +21,7 @@
     "jenkins_name": "Common Design",
     "jenkins_other_name": "ds-commondesign",
     "prod_url": "https://web.brand.unocha.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.commondesign-unocha-org.ahconu.org"
   },
   "docstore-site": {
     "elk_name": "docstore",
@@ -37,7 +37,7 @@
     "jenkins_name": "GMS",
     "jenkins_other_name": "gms",
     "prod_url": "https://gms.unocha.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.gms-unocha-org.ahconu.org"
   },
   "iasc8": {
     "elk_name": "iasc",
@@ -45,7 +45,7 @@
     "jenkins_name": "IASC",
     "jenkins_other_name": "iasc",
     "prod_url": "https://interagencystandingcommittee.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.interagencystandingcommittee-org.ahconu.org"
   },
   "odsg8-site": {
     "elk_name": "odsg",
@@ -53,7 +53,7 @@
     "jenkins_name": "ODSG",
     "jenkins_other_name": "odsg",
     "prod_url": "https://odsg.unocha.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.odsg-unocha-org.ahconu.org"
   },
   "response-site": {
     "elk_name": "response",
@@ -61,7 +61,7 @@
     "jenkins_name": "Response",
     "jenkins_other_name": "response",
     "prod_url": "https://response.reliefweb.int/",
-    "stage_url": ""
+    "stage_url": "https://stage.response-reliefweb-int.ahconu.org/"
   },
   "rwint9-site": {
     "elk_name": "rwint",
@@ -69,7 +69,7 @@
     "jenkins_name": "ReliefWeb",
     "jenkins_other_name": "rwint-site",
     "prod_url": "https://reliefweb.int/",
-    "stage_url": ""
+    "stage_url": "https://stage.reliefweb-int.ahconu.org"
   },
   "slt8-site": {
     "elk_name": "slt",
@@ -77,7 +77,7 @@
     "jenkins_name": "SLT",
     "jenkins_other_name": "slt",
     "prod_url": "https://savinglivestogether.unocha.org",
-    "stage_url": ""
+    "stage_url": "https://stage.savinglivestogether-unocha-org.ahconu.org"
   },
   "sesame-site": {
     "elk_name": "sesame",
@@ -85,7 +85,7 @@
     "jenkins_name": "Sesame",
     "jenkins_other_name": "sesame",
     "prod_url": "https://sesame.ahconu.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.auth.ahconu.org"
   },
   "unocha-site": {
     "elk_name": "unocha",
@@ -93,7 +93,7 @@
     "jenkins_name": "UN-OCHA D10",
     "jenkins_other_name": "unocha",
     "prod_url": "https://www.unocha.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.unocha-org.ahconu.org/"
   },
   "whd-2023-site": {
     "elk_name": "whd",
@@ -101,6 +101,6 @@
     "jenkins_name": "WHD",
     "jenkins_other_name": "whd",
     "prod_url": "https://www.worldhumanitarianday.org/",
-    "stage_url": ""
+    "stage_url": "https://stage.worldhumanitarianday-org.ahconu.org"
   }
 }

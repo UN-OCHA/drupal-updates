@@ -29,6 +29,11 @@ main () {
 
     wait_to_continue
 
+    if [[ $stage_url = "" ]]
+    then
+      continue
+    fi
+
     trigger_vrt_job
 
     vrt_report "$repo"
