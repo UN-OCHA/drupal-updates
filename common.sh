@@ -269,6 +269,11 @@ create_pr () {
   done
 }
 
+dev_communications () {
+  echo "Check https://docs.google.com/document/d/1MshMxyRmKqItF6sYer0BsRmTTOvuode4v-WErgtqybA/edit for communication steps"
+  echo "And then update this script with clearer instructions"
+}
+
 vrt_comparison () {
   echo "This uses vrt to open some links on the dev sites and compare them to" 
   echo "the same links on the production site."
@@ -312,6 +317,11 @@ create_tags () {
 
     open_url "${url}"
   done;
+}
+
+deploy_communications () {
+  echo "Check https://docs.google.com/document/d/1MshMxyRmKqItF6sYer0BsRmTTOvuode4v-WErgtqybA/edit for communication steps"
+  echo "And then update this script with clearer instructions"
 }
 
 prod_deploy () {
