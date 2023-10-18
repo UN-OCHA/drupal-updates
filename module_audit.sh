@@ -16,8 +16,14 @@ echo ""
 echo "NB - this assumes \`composer install\` has been run in each repo on"
 echo "your local directories, use 'reset_branches.sh' to prepare all repos."
 
+wait_to_continue
+
+# Prepare header.
 printf -v date '%(%Y-%m-%d)T' -1
 header_row="Last updated: ${date}. ; Maintenance status ; Security coverage ; Count "
+for repo in "${repolist[@]}" ; do
+  header_row="$header_row ; $repo"
+done
 options=("full" "outdated")
 current_directory="$(pwd)"
 
@@ -36,10 +42,6 @@ for type in "${options[@]}"; do
     spacer=""
     packages="${vendor}/*"
     output_file="data/${vendor}-${base_output_file}"
-    # Prepare header.
-    for repo in "${repolist[@]}" ; do
-      header_row="$header_row ; $repo"
-    done
     echo "$header_row" > "$output_file"
 
     for repo in "${repolist[@]}" ; do
@@ -47,6 +49,7 @@ for type in "${options[@]}"; do
       echo "cd-ing to the $repo repo"
       cd "${full_path}/${repo}" || exit
       project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
+      echo "Project name: $project_name"
       docker compose -f local/docker-compose.yml up -d
       docker exec -w /srv/www "${project_name}-site" composer show $option "${packages}" > "${current_directory}/tmp-module-list.txt"
       docker compose -f local/docker-compose.yml down
