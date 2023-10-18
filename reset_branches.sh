@@ -20,15 +20,23 @@ for repo in "${repolist[@]}" ; do
   echo "cd-ing to the $repo repo"
   cd "${full_path}/${repo}" || exit
 
-  update_branches
+  update_branches || exit
 
   echo "- - -"
   echo " --- "
   echo "- - -"
 
   echo "Installing composer packages for $repo"
+  echo "Current directory: $(pwd)"
 
-  docker run --rm -u 1000 -v "$(pwd):/srv/www" -w /srv/www "${docker_image}" composer install
+  branches=( "main" "develop" )
+  for branch in "${branches[@]}"; do
+    project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
+    docker compose -f local/docker-compose.yml up -d
+    docker exec -w /srv/www "${project_name}-site" composer install
+    docker compose -f local/docker-compose.yml down
+    # docker run --rm -v "$(pwd):/srv/www" -w /srv/www "${docker_image}" composer install || exit
+  done
 
   cd - || exit
 
