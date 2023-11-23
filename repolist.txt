@@ -3,38 +3,38 @@
 
 # The stages:
 # 1. create PR
-# 2. vrt comparison of prod and stage
-# 3. merge to main
-# 4. create tags
-# 5. prod deploy
+# 2. send dev communications
+# 3. vrt comparison of prod and stage
+# 4. merge to main
+# 5. create tags
+# 6. stage deploy
+# 6. send deploy communications
+# 7. prod deploy
 
-assessmentregistry8-site
 cerf8
 common-design-site
-docstore-site
 drupal-starterkit
 gms-site
 iasc8
-numbers-site
 odsg8-site
-pocam8-site
 response-site
 rwint9-site
 slt8-site
 sesame-site
 unocha-site
+whd-2023-site
 
-# whd-2023-site
-
-# # D7 site
-# hrinfo-site
-
-# Now static
+## Now static
 # indicatorregistry8-site
+# pocam8-site
+
+## Decommissioned
+# assessmentregistry8-site
+# docstore-site
+# hrinfo-site
+# numbers-site
 
 # URLs for reference:
-# https://assessments.hpc.tools/
-# https://dev.assessments-hpc-tools.ahconu.org/
 # https://web.brand.unocha.org/
 # https://demo.commondesign-unocha-org.ahconu.org/
 # https://cerf.un.org/

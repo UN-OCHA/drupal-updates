@@ -164,6 +164,7 @@ push_changes () {
 
 pre_deploy_tests () {
 
+  echo "Testing differences between dev and prod instances"
   for repo in "${repolist[@]}" ; do
 
     if [[ $repo = "docstore-site" ]]
@@ -177,7 +178,7 @@ pre_deploy_tests () {
         "reference" )
           environment="prod" ;;
         "test" )
-          environment="stage" ;;
+          environment="dev" ;;
       esac
       echo "Running $stage stage for $repo"
       run_vrt "$repo" "$stage" "$environment"
@@ -317,6 +318,58 @@ create_tags () {
 
     open_url "${url}"
   done;
+}
+
+stage_deploy () {
+  echo "Preparing stage deployments."
+  echo "Step one, refresh databases from production."
+  for repo in "${repolist[@]}" ; do
+    # Match repo to other names.
+    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
+    jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
+
+    echo "Opening jenkins stage database restore link for $repo."
+    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-database-restore/build"
+  done;
+
+  echo "Restore the databases for each repo"
+    wait_to_continue
+
+
+  echo "Step two: deploy to stage"
+  for repo in "${repolist[@]}" ; do
+    # Match repo to other names.
+    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
+    jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
+
+    echo "Opening jenkins links for $repo."
+    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-login-url/build"
+    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-deploy/build"
+    echo "Deploy to stage."
+  echo "Check https://docs.google.com/document/d/1MshMxyRmKqItF6sYer0BsRmTTOvuode4v-WErgtqybA/edit for communication steps"
+  echo "And then update this script with clearer instructions"
+    wait_to_continue
+
+  done;
+
+  echo "Step three: VRT between prod and stage"
+  for repo in "${repolist[@]}" ; do
+    # Match repo to other names.
+    stack_name=$(jq -r '."'"$repo"'".stack_name' < ./repo-lookup.json)
+    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
+    jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
+
+    echo "Running VRT on prod for reference."
+    run_vrt "$repo" reference stage
+
+    echo "Running VRT on stage for comparison."
+    run_vrt "$repo" test stage
+
+    echo "Opening VRT reports"
+    vrt_report "$repo"
+
+  done;
+  echo "All done"
 }
 
 deploy_communications () {
