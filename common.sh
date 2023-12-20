@@ -123,6 +123,7 @@ check_and_add_changes () {
   echo "- - -"
   echo "- - -"
   echo "In another tab/ window, 'cd ${full_path}/${repo}', make any changes necessary and 'git add' them to the ${branch_name} branch of ${repo}"
+  copy_to_clipboard "cd ${full_path}/${repo}"
   echo "CD command: 'cd ${full_path}/${repo}' copied to clipboard"
   echo "- - -"
   echo "- - -"
@@ -186,6 +187,30 @@ pre_deploy_tests () {
 
     vrt_report "$repo"
   done;
+}
+
+check_gtm () {
+  home="$1"
+  echo "$home"
+  echo "Checking for presence of GTM:"
+  curl -L -s "$home" | grep -iF "GTM-" || echo "Not finding GTM- key. Check this!"
+  wait_to_continue
+}
+
+check_extra () {
+  repo="$1"
+  if [[ $repo = "cerf8" ]]
+  then
+    echo "Checking PDF works for CERF"
+    test_page="https://cerf.un.org/what-we-do/allocation-pdf/2021/summary/21-RR-COL-49434"
+    curl -L -s "$test_page" | grep -iF "%%EOF" || echo "Didn't get a PDF returned. Check this!"
+    wait_to_continue
+  elif [[ $repo = "other" ]]
+  then
+    echo "additional checks here"
+  else
+    echo "No checks for $repo"
+  fi
 }
 
 run_vrt () {
@@ -265,9 +290,10 @@ create_pr () {
 
     cd - || exit
 
-    echo "All done"
-
   done
+
+  echo "All done"
+
 }
 
 dev_communications () {
@@ -382,6 +408,7 @@ prod_deploy () {
   for repo in "${repolist[@]}" ; do
     # Match repo to other names.
     stack_name=$(jq -r '."'"$repo"'".stack_name' < ./repo-lookup.json)
+    prod_url=$(jq -r '."'"$repo"'".prod_url' < ./repo-lookup.json)
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
     jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
 
@@ -394,6 +421,12 @@ prod_deploy () {
     open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-prod-drush"
     echo "Deploy this to prod and continue when it's done"
     wait_to_continue
+
+    echo "Checking if GTM is present on the site"
+    check_gtm "$prod_url"
+
+    echo "Running any site-specific tests"
+    check_extra "$repo"
 
     echo "Running post-deploy VRT for comparison."
     run_vrt "$repo" test prod
