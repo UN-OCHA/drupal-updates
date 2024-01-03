@@ -22,11 +22,12 @@ rwint9-site
 slt8-site
 sesame-site
 unocha-site
-whd-2023-site
+
 
 ## Now static
 # indicatorregistry8-site
 # pocam8-site
+# whd-2023-site
 
 ## Decommissioned
 # assessmentregistry8-site
