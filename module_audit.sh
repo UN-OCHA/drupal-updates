@@ -25,7 +25,6 @@ for repo in "${repolist[@]}" ; do
   header_row="$header_row ; $repo"
 done
 options=("full" "outdated")
-current_directory="$(pwd)"
 
 for type in "${options[@]}"; do
   if [[ "$type" == "full" ]]; then
@@ -46,17 +45,8 @@ for type in "${options[@]}"; do
 
     for repo in "${repolist[@]}" ; do
       spacer+=";"
-      echo "cd-ing to the $repo repo"
-      cd "${full_path}/${repo}" || exit
-      project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
-      echo "Project name: $project_name"
-      docker compose -f local/docker-compose.yml up -d
-      docker exec -w /srv/www "${project_name}-site" composer show $option "${packages}" > "${current_directory}/tmp-module-list.txt"
-      docker compose -f local/docker-compose.yml down
-      cd - || exit
-      while IFS="" read -r module || [ -n "$module" ]
-      do module_details=$(echo "$module" | tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2 )
-        echo "$module_details"
+      for module_details in $(composer show --locked --direct $option -d "${full_path}/${repo}" "${packages}" \
+        | tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2 ); do
         module_name=$(echo "$module_details" | cut -d ';' -f 1 )
         module_version=$(echo "$module_details" | cut -d ';' -f 2 )
         # Extra information.
@@ -101,9 +91,7 @@ for type in "${options[@]}"; do
             echo "${module_name};;;${count_formula}${spacer}$module_version $extra" >> "$output_file"
           fi
         fi
-      done < tmp-module-list.txt
-      # Clean up.
-      rm tmp-module-list.txt
+      done
       # Add a trailing semi-colon to each line.
       awk '{print $0 ";"}' "$output_file" > tmpfile.txt && mv tmpfile.txt "$output_file"
     done;

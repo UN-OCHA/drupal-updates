@@ -29,14 +29,10 @@ for repo in "${repolist[@]}" ; do
   echo "Installing composer packages for $repo"
   echo "Current directory: $(pwd)"
 
-  branches=( "main" "develop" )
-  for branch in "${branches[@]}"; do
-    project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
-    docker compose -f local/docker-compose.yml up -d
-    docker exec -w /srv/www "${project_name}-site" composer install
-    docker compose -f local/docker-compose.yml down
-    # docker run --rm -v "$(pwd):/srv/www" -w /srv/www "${docker_image}" composer install || exit
-  done
+  project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
+  docker compose -f local/docker-compose.yml up -d
+  docker exec -w /srv/www "${project_name}-site" composer install
+  docker compose -f local/docker-compose.yml down
 
   cd - || exit
 
