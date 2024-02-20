@@ -105,6 +105,6 @@ done;
 spreadsheet_url="https://docs.google.com/spreadsheets/d/1iMSJE5Lhk86m0lBWLE1R64QFGxZhFUfmconmmyu3XAU/edit"
 copy_to_clipboard "${spreadsheet_url}"
 
-echo "Spreadsheet url ${spreadsheet_url} copied to the clipboard. Use File > Import to update the relevant sheets."
-echo ""
-echo "Note that semi-colons are used to separate fields, you need to specify that as a custom separator when you upload each file."
+echo "Spreadsheet url ${spreadsheet_url} copied to the clipboard. Use File"
+echo " > Import to update the relevant sheets, then select 'Replace current"
+echo "sheet' in the 'Import Location' dropdown."

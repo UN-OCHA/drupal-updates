@@ -297,8 +297,7 @@ create_pr () {
 }
 
 dev_communications () {
-  echo "Check https://docs.google.com/document/d/1MshMxyRmKqItF6sYer0BsRmTTOvuode4v-WErgtqybA/edit for communication steps"
-  echo "And then update this script with clearer instructions"
+  echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
 }
 
 vrt_comparison () {
@@ -372,8 +371,7 @@ stage_deploy () {
     open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-login-url/build"
     open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-deploy/build"
     echo "Deploy to stage."
-  echo "Check https://docs.google.com/document/d/1MshMxyRmKqItF6sYer0BsRmTTOvuode4v-WErgtqybA/edit for communication steps"
-  echo "And then update this script with clearer instructions"
+    echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
     wait_to_continue
 
   done;
@@ -381,26 +379,28 @@ stage_deploy () {
   echo "Step three: VRT between prod and stage"
   for repo in "${repolist[@]}" ; do
     # Match repo to other names.
-    stack_name=$(jq -r '."'"$repo"'".stack_name' < ./repo-lookup.json)
-    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
-    jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
+    prod_url=$(jq -r '."'"$repo"'".prod_url' < ./repo-lookup.json)
+    prod_url="https://$prod_url"
+    stage_url=$(jq -r '."'"$repo"'".stage_url' < ./repo-lookup.json)
+    stage_url="https://$BASIC_AUTH_CREDENTIALS@$stage_url"
 
-    echo "Running VRT on prod for reference."
-    run_vrt "$repo" reference stage
+    curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${stage_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
 
-    echo "Running VRT on stage for comparison."
-    run_vrt "$repo" test stage
+    # echo "Running VRT on prod for reference."
+    # run_vrt "$repo" reference stage
 
-    echo "Opening VRT reports"
-    vrt_report "$repo"
+    # echo "Running VRT on stage for comparison."
+    # run_vrt "$repo" test stage
+
+    # echo "Opening VRT reports"
+    # vrt_report "$repo"
 
   done;
   echo "All done"
 }
 
 deploy_communications () {
-  echo "Check https://docs.google.com/document/d/1MshMxyRmKqItF6sYer0BsRmTTOvuode4v-WErgtqybA/edit for communication steps"
-  echo "And then update this script with clearer instructions"
+  echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
 }
 
 prod_deploy () {

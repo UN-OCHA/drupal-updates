@@ -2,6 +2,7 @@
   "cerf8": {
     "elk_name": "cerf",
     "stack_name": "cerf-stack",
+    "stage_url": "stage.cerf-un-org.ahconu.org",
     "prod_url": "cerf.un.org",
     "jenkins_name": "CERF",
     "jenkins_other_name": "cerf"
@@ -9,13 +10,15 @@
   "common-design-site": {
     "elk_name": "commondesign",
     "stack_name": "common-design-stack",
-    "prod_url": "web.brand.un.org",
+    "stage_url": "stage.commondesign-unocha-org.ahconu.org",
+    "prod_url": "web.brand.unocha.org",
     "jenkins_name": "Common Design",
     "jenkins_other_name": "ds-commondesign"
   },
   "drupal-starterkit": {
     "elk_name": "n/a",
     "stack_name": "n/a",
+    "stage_url": "n/a",
     "prod_url": "n/a",
     "jenkins_name": "n/a",
     "jenkins_other_name": "n/a"
@@ -23,6 +26,7 @@
   "gms-site": {
     "elk_name": "gms",
     "stack_name": "gms-stack",
+    "stage_url": "stage.gms-unocha-org.ahconu.org",
     "prod_url": "gms.unocha.org",
     "jenkins_name": "GMS",
     "jenkins_other_name": "gms"
@@ -30,6 +34,7 @@
   "iasc8": {
     "elk_name": "iasc",
     "stack_name": "iasc-stack",
+    "stage_url": "stage.interagencystandingcommittee-org.ahconu.org",
     "prod_url": "interagencystandingcommittee.org",
     "jenkins_name": "IASC",
     "jenkins_other_name": "iasc"
@@ -37,6 +42,7 @@
   "odsg8-site": {
     "elk_name": "odsg",
     "stack_name": "odsg-stack",
+    "stage_url": "stage.odsg-unocha-org.ahconu.org",
     "prod_url": "odsg.unocha.org",
     "jenkins_name": "ODSG",
     "jenkins_other_name": "odsg"
@@ -44,6 +50,7 @@
   "response-site": {
     "elk_name": "response",
     "stack_name": "response-stack",
+    "stage_url": "stage.response-reliefweb-int.ahconu.org",
     "prod_url": "response.reliefweb.int",
     "jenkins_name": "Response",
     "jenkins_other_name": "response"
@@ -51,6 +58,7 @@
   "rwint9-site": {
     "elk_name": "rwint",
     "stack_name": "rwint-stack",
+    "stage_url": "stage.reliefweb-int.ahconu.org",
     "prod_url": "reliefweb.int",
     "jenkins_name": "ReliefWeb",
     "jenkins_other_name": "rwint-site"
@@ -58,6 +66,7 @@
   "slt8-site": {
     "elk_name": "slt",
     "stack_name": "slt-stack",
+    "stage_url": "stage.savinglivestogether-unocha-org.ahconu.org",
     "prod_url": "savinglivestogether.unocha.org",
     "jenkins_name": "SLT",
     "jenkins_other_name": "slt"
@@ -65,6 +74,7 @@
   "sesame-site": {
     "elk_name": "sesame",
     "stack_name": "sesame-stack",
+    "stage_url": "stage.auth-unocha-org.ahconu.org",
     "prod_url": "auth.ahconu.org",
     "jenkins_name": "Sesame",
     "jenkins_other_name": "sesame"
@@ -72,13 +82,15 @@
   "unocha-site": {
     "elk_name": "unocha",
     "stack_name": "unocha-stack",
+    "stage_url": "stage.unocha-org.ahconu.org",
     "prod_url": "unocha.org",
-    "jenkins_name": "UN-OCHA D10",
+    "jenkins_name": "UN-OCHA",
     "jenkins_other_name": "unocha"
   },
   "whd-2023-site": {
     "elk_name": "whd",
     "stack_name": "whd-stack",
+    "stage_url": "stage.worldhumanitarianday-org.ahconu.org",
     "prod_url": "worldhumanitarianday.org",
     "jenkins_name": "WHD",
     "jenkins_other_name": "whd"
