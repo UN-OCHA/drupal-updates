@@ -73,7 +73,7 @@
     "elk_name": "unocha",
     "stack_name": "unocha-stack",
     "prod_url": "unocha.org",
-    "jenkins_name": "UN-OCHA D10",
+    "jenkins_name": "UN-OCHA",
     "jenkins_other_name": "unocha"
   },
   "whd-2023-site": {
