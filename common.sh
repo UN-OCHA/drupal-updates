@@ -250,7 +250,7 @@ vrt_report () {
   elk_name=$(jq -r '."'"$repo"'".elk_name' < ./repo-lookup.json)
   echo "Opening ELK report for $elk_name"
 
-  log_url="https://elk.aws.ahconu.org/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(unocha.property,drupal_action,drupal.message,drupal_request_uri,syslog.severity_label,syslog.host),filters:!(('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:unocha.property,negate:!f,params:!(${elk_name}),type:phrases),query:(bool:(minimum_should_match:1,should:!((match_phrase:(unocha.property:${elk_name})))))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:informational),type:phrase),query:(match_phrase:(syslog.severity_label:informational))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:debug),type:phrase),query:(match_phrase:(syslog.severity_label:debug))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:notice))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:drupal.action,negate:!t,params:(query:'access%20denied'),type:phrase),query:(match_phrase:(drupal.action:'access%20denied'))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:drupal_action,negate:!t,params:(query:user_expire),type:phrase),query:(match_phrase:(drupal_action:user_expire)))),index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+  log_url="https://elk.aws.ahconu.org/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(unocha.property,drupal.action,drupal.message,drupal.request_uri,syslog.severity_label,unocha.environment),filters:!(('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:unocha.property,negate:!f,params:!(${elk_name}),type:phrases),query:(bool:(minimum_should_match:1,should:!((match_phrase:(unocha.property:${elk_name})))))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:informational),type:phrase),query:(match_phrase:(syslog.severity_label:informational))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:debug),type:phrase),query:(match_phrase:(syslog.severity_label:debug))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:notice))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:warning))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:drupal.action,negate:!t,params:(query:'access%20denied'),type:phrase),query:(match_phrase:(drupal.action:'access%20denied'))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:drupal.action,negate:!t,params:(query:user_expire),type:phrase),query:(match_phrase:(drupal.action:user_expire)))),index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
   open_url "$log_url"
 }
 
@@ -353,49 +353,10 @@ stage_deploy () {
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
     jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
 
-    echo "Opening jenkins stage database restore link for $repo."
-    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-database-restore/build"
+    echo "Opening jenkins test deploy link for $repo."
+    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-testdeploy/build"
   done;
 
-  echo "Restore the databases for each repo"
-    wait_to_continue
-
-
-  echo "Step two: deploy to stage"
-  for repo in "${repolist[@]}" ; do
-    # Match repo to other names.
-    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
-    jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
-
-    echo "Opening jenkins links for $repo."
-    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-login-url/build"
-    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-stage-deploy/build"
-    echo "Deploy to stage."
-    echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
-    wait_to_continue
-
-  done;
-
-  echo "Step three: VRT between prod and stage"
-  for repo in "${repolist[@]}" ; do
-    # Match repo to other names.
-    prod_url=$(jq -r '."'"$repo"'".prod_url' < ./repo-lookup.json)
-    prod_url="https://$prod_url"
-    stage_url=$(jq -r '."'"$repo"'".stage_url' < ./repo-lookup.json)
-    stage_url="https://$BASIC_AUTH_CREDENTIALS@$stage_url"
-
-    curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${stage_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
-
-    # echo "Running VRT on prod for reference."
-    # run_vrt "$repo" reference stage
-
-    # echo "Running VRT on stage for comparison."
-    # run_vrt "$repo" test stage
-
-    # echo "Opening VRT reports"
-    # vrt_report "$repo"
-
-  done;
   echo "All done"
 }
 
@@ -407,7 +368,6 @@ prod_deploy () {
   echo "Preparing prod deployments."
   for repo in "${repolist[@]}" ; do
     # Match repo to other names.
-    stack_name=$(jq -r '."'"$repo"'".stack_name' < ./repo-lookup.json)
     prod_url=$(jq -r '."'"$repo"'".prod_url' < ./repo-lookup.json)
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' < ./repo-lookup.json)
     jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' < ./repo-lookup.json)
@@ -434,8 +394,6 @@ prod_deploy () {
     echo "Opening VRT reports"
     vrt_report "$repo"
 
-    echo "Opened pull request page for stack repo"
-    open_url "${remote_url}/${stack_name}/pulls"
   done;
   echo "All done"
 }
