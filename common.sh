@@ -12,8 +12,10 @@ requires () {
 }
 
 requires "composer"
+requires "curl"
 requires "docker"
 requires "git"
+requires "jq"
 
 source ./.env
 remote_url=$REMOTE_URL
