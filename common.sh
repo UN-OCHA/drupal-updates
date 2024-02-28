@@ -165,32 +165,6 @@ push_changes () {
 
 }
 
-pre_deploy_tests () {
-
-  echo "Testing differences between dev and prod instances"
-  for repo in "${repolist[@]}" ; do
-
-    if [[ $repo = "docstore-site" ]]
-    then
-      continue
-    fi
-
-    stages=('reference' 'test')
-    for stage in "${stages[@]}" ; do
-      case $stage in
-        "reference" )
-          environment="prod" ;;
-        "test" )
-          environment="dev" ;;
-      esac
-      echo "Running $stage stage for $repo"
-      run_vrt "$repo" "$stage" "$environment"
-    done;
-
-    vrt_report "$repo"
-  done;
-}
-
 check_gtm () {
   home="$1"
   echo "$home"
@@ -220,16 +194,21 @@ run_vrt () {
   stage="$2"
   environment="$3"
 
-  cd ../tools-vrt || exit
+  if [ ! -d "../tools-vrt" ]; then
+    echo "This command assumes the Tools-vrt repo is checked out in the same"
+    echo "directory as this 'updates' repo, and cannot run without it."
+  else
+    cd ../tools-vrt || exit
 
-  # TODO revise VRT logins so it works with authenticated users too.
-  # statuses=( 'anon' 'auth' )
-  statuses=( 'anon' )
-  for status in "${statuses[@]}" ; do
-    docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run "${stage}"
-  done
+    # TODO revise VRT logins so it works with authenticated users too.
+    # statuses=( 'anon' 'auth' )
+    statuses=( 'anon' )
+    for status in "${statuses[@]}" ; do
+      docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run "${stage}"
+    done
 
-  cd - || exit
+    cd - || exit
+  fi
 }
 
 vrt_report () {
@@ -305,12 +284,41 @@ dev_communications () {
 vrt_comparison () {
   echo "This uses vrt to open some links on the dev sites and compare them to" 
   echo "the same links on the production site."
-  if [ ! -d "../tools-vrt" ]; then
-    echo "This command assumes the Tools-vrt repo is checked out in the same"
-    echo "directory as this 'updates' repo, and cannot run without it."
+
+  # Check we have a Jenkins API token.
+  if [[ $JENKINS_TOKEN = '' ]]
+  then
+    echo "A Jenkins API token is needed and should be defined in the .env file."
+    echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
   else
-    pre_deploy_tests
-  fi;
+    results=("https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/")
+    for repo in "${repolist[@]}" ; do
+
+      if [[ $repo = "docstore-site" ]]
+      then
+        continue
+      fi
+
+      # Match repo to other names.
+      prod_url=$(jq -r '."'"$repo"'".prod_url' < ./repo-lookup.json)
+      prod_url="https://$prod_url"
+      stage_url=$(jq -r '."'"$repo"'".stage_url' < ./repo-lookup.json)
+      stage_url="https://$BASIC_AUTH_CREDENTIALS@$stage_url"
+
+      echo "Kicking off jenkins vrt job for $repo."
+      curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${stage_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
+
+      last_build_url=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastBuild.url" | tr '"' '')
+      results+=("${last_build_url}artifact/data/anon/html_report/index.html")
+    done;
+  fi
+
+  echo "Opening jenkins vrt output to check results of VRT jobs."
+  echo "Will need to wait till jobs are finished before results are available."
+  for url in "${results[@]}"; do
+    echo "$url"
+    open_url "$url"
+  done
 
 }
 
