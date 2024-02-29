@@ -7,7 +7,7 @@
 # more than links.
 # The stages:
 # 1. create PR
-# 2. vrt comparison of prod and stage
+# 2. vrt comparison of prod and dev
 # 3. Send communications, update Jira tickets
 # 4. merge to main
 # 5. create tags
@@ -35,7 +35,7 @@ read -r ticket_number
 # Choose stage.
 # Get type of update.
 echo "Choose stage of updates"
-options=("create PR" "send dev communications" "vrt comparison of prod and stage"  "merge to main" "create tags" "stage_deploy" "send deploy communications" "prod deploy")
+options=("create PR" "send dev communications" "vrt comparison of prod and dev"  "merge to main" "create tags" "stage_deploy" "send deploy communications" "prod deploy")
 select stage in "${options[@]}"; do
   case $stage in
     "create PR")
@@ -46,7 +46,7 @@ select stage in "${options[@]}"; do
       dev_communications
 
       break;;
-    "vrt comparison of prod and stage")
+    "vrt comparison of prod and dev")
       vrt_comparison
 
       break;;
