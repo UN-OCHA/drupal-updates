@@ -7,7 +7,7 @@ source ./common.sh
 
 wait_to_continue
 
-for repo in "${repolist[@]}" ; do
+for repo in "${repolist[@]}"; do
 
   echo "- - -"
   echo " --- "
@@ -36,4 +36,4 @@ for repo in "${repolist[@]}" ; do
 
   # wait_to_continue
 
-done;
+done
