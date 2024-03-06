@@ -9,8 +9,6 @@ wait_to_continue
 
 for repo in "${repolist[@]}" ; do
 
-  docker_image=$(awk '/FROM/ {print $2; exit 1}' "${full_path}/${repo}/docker/Dockerfile")
-
   echo "- - -"
   echo " --- "
   echo "- - -"

@@ -2,7 +2,10 @@
 
 # Functions that can be used by other updating scripts.
 
-# set -e
+# TODO
+# Adapt 'open' and 'copy' commands for macOS and windows too.
+
+set -eux
 
 requires () {
     if ! command -v "$1" &>/dev/null; then
