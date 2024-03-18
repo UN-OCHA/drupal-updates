@@ -7,9 +7,7 @@ source ./common.sh
 
 wait_to_continue
 
-for repo in "${repolist[@]}" ; do
-
-  docker_image=$(awk '/FROM/ {print $2; exit 1}' "${full_path}/${repo}/docker/Dockerfile")
+for repo in "${repolist[@]}"; do
 
   echo "- - -"
   echo " --- "
@@ -38,4 +36,4 @@ for repo in "${repolist[@]}" ; do
 
   # wait_to_continue
 
-done;
+done
