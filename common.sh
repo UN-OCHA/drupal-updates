@@ -5,7 +5,7 @@
 # TODO
 # Adapt 'open' and 'copy' commands for macOS and windows too.
 
-set -eux
+set -eu
 
 requires() {
   if ! command -v "$1" &>/dev/null; then
