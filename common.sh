@@ -309,10 +309,9 @@ vrt_comparison() {
       echo "Kicking off jenkins vrt job for $repo."
       curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
 
-      # Will return ""https://jenkins.aws.ahconu.org/job/vrt-anonymous/<last-build-number>/"
+      # Will return ""https://jenkins.aws.ahconu.org/job/vrt-anonymous/<last-build-number>/artifact/data/anon/html_report/index.html"
       last_build_url=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastBuild.url" | tr -d '"')
       results+=("${last_build_url}artifact/data/anon/html_report/index.html")
-"https://jenkins.aws.ahconu.org/job/vrt-anonymous/50/artifact/data/anon/html_report/index.html"
     done
   fi
 
