@@ -293,8 +293,13 @@ vrt_comparison() {
     echo "A Jenkins API token is needed and should be defined in the .env file."
     echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
   else
+
+    # This gets the previous build number for the jenkins job. We will augment it for each run.
+    build_number=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastCompletedBuild.number" | tr -d '"')
+
     results=("https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/")
     for repo in "${repolist[@]}"; do
+      build_number=$((build_number + 1))
 
       if [[ $repo = "docstore-site" ]]; then
         continue
@@ -309,9 +314,7 @@ vrt_comparison() {
       echo "Kicking off jenkins vrt job for $repo."
       curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
 
-      # Will return ""https://jenkins.aws.ahconu.org/job/vrt-anonymous/<last-build-number>/artifact/data/anon/html_report/index.html"
-      last_build_url=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastBuild.url" | tr -d '"')
-      results+=("${last_build_url}artifact/data/anon/html_report/index.html")
+      results+=("https://jenkins.aws.ahconu.org/job/vrt-anonymous/${build_number}/artifact/data/anon/html_report/index.html")
     done
   fi
 
