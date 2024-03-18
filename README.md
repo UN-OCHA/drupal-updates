@@ -7,14 +7,7 @@ There are four separate scripts:
 
 * `common_changes.sh` For making the same change to more than one repo.
 
-* `deployment_steps.sh` Test, prep and complete deployments.
-** 1. test with vrt - comparison of prod and dev
-** 2. send communications, update Jira tickets
-** 3. merge to main
-** 4. create tags
-** 5. stage deploy
-** 6. send more communications
-** 7. prod deploy - including post-deployment tests
+* `deployment_steps.sh` Test, prep and complete deployments. See steps below.
 
 * `module_audit.sh` Produce a csv of all drupal and unocha modules used.
 
@@ -25,7 +18,7 @@ develop and main branches and install dependencies for each repo.
 Jenkins ID and API token, defined in `.env` file, to kick off vrt jobs.
 See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/
 
-Most, e.g. docker, composer, git, curl, should already be in place.
+Most other requirements: docker, composer, git, curl, etc. will already exist.
 
 The deploy script requires `jq`
 on Ubuntu `sudo apt install jq`
@@ -44,6 +37,15 @@ A list of repos to run the scripts on. These often change depending on the job.
 
 * `repo-lookup.json`
 A dictionary to match repo names to e.g. jenkins names, elk name, and prod url.
+
+## Deployment steps
+1. test with vrt - comparison of prod and dev
+1. send communications, update Jira tickets
+1. merge to main
+1. create tags
+1. stage deploy
+1. send more communications
+1. prod deploy - including post-deployment tests
 
 ## Post deployment tests
 * GTM (see `check_gtm` function in `common.sh`).
