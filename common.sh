@@ -27,7 +27,7 @@ jenkins_url=$JENKINS_URL
 
 # Get repolist from repolist.txt
 repolist=()
-echo "List of repos to reset:"
+echo "List of repos to work on:"
 while IFS= read -r -u 3 repo; do
   # Skip blank lines and commented lines.
   case "$repo" in '' | \#*) continue ;; esac
@@ -352,12 +352,15 @@ create_tags() {
     echo "The new tag will be $next"
 
     # Final URL
-    today=$(date +%d-%m-%Y)
-    url="${remote_url}/${repo}/releases/new?target=main&tag=$next&title=Deploy%20$today"
+    # today=$(date +%d-%m-%Y)
+    tomorrow=$(date --date="tomorrow" +%d-%m-%Y)
+    url="${remote_url}/${repo}/releases/new?target=main&tag=$next&title=Deploy%20$tomorrow"
     echo "$url"
 
     open_url "${url}"
   done
+
+  echo "Adjust date and tag version if necessary - use 'Generate release notes' button to summarize changes."
 }
 
 stage_deploy() {
