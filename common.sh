@@ -414,4 +414,8 @@ prod_deploy() {
 
   done
   echo "All done"
+
+  echo "Follow-up steps:"
+  echo "Check open Jira tickets and update as necessary."
+  echo "Run module audit script and update the spreadsheet."
 }
