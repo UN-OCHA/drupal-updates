@@ -9,12 +9,12 @@ requires "xmllint"
 
 echo ""
 echo ""
-echo "For updating the main spreadsheet, check that all D9+ repositories are"
+echo "For updating the main spreadsheet, check that all Drupal repositories are"
 echo "uncommented in repolist.txt"
 echo ""
 echo ""
-echo "NB - this assumes \`composer install\` has been run in each repo on"
-echo "your local directories, use 'reset_branches.sh' to prepare all repos."
+echo "NB - this assumes both develop and main are up-to-date"
+echo "use 'reset_branches.sh' to prepare all repos."
 
 wait_to_continue
 
