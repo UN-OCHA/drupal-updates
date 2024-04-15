@@ -20,17 +20,12 @@ for repo in "${repolist[@]}"; do
 
   update_branches || exit
 
-  echo "- - -"
-  echo " --- "
-  echo "- - -"
-
-  echo "Installing composer packages for $repo"
-  echo "Current directory: $(pwd)"
-
-  project_name=$(awk -F= '/PROJECT_NAME/ {print $2; exit 1}' "${full_path}/${repo}/local/.env")
-  docker compose -f local/docker-compose.yml up -d
-  docker exec -w /srv/www "${project_name}-site" composer install || exit
-  docker compose -f local/docker-compose.yml down
+  # echo "Installing composer packages for $repo"
+  # echo "Current directory: $(pwd)"
+  # project_name=$(awk -F '=' '/PROJECT_NAME/ {print $2; exit 0}' "${full_path}/${repo}/local/.env")
+  # docker compose -f local/docker-compose.yml up -d
+  # docker exec -w /srv/www "${project_name}-site" composer install || exit
+  # docker compose -f local/docker-compose.yml down
 
   cd - || exit
 

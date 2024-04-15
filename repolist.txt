@@ -1,6 +1,7 @@
 # Use '#' symbol to comment out repos.
 # When adding repos here, also add to `repo-lookup.txt`.
 
+ai-summarize-site
 cerf8
 common-design-site
 drupal-starterkit
