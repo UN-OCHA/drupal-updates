@@ -1,4 +1,13 @@
 {
+  "ai-summarize-site": {
+    "elk_name": "ai-summarize",
+    "stack_name": "ai-summarize-stack",
+    "dev_url": "dev.summary-ai-unocha-org.ahconu.org",
+    "stage_url": "stage.summary-ai-unocha-org.ahconu.org",
+    "prod_url": "summary.ai.unocha.org",
+    "jenkins_name": "AI Summarize",
+    "jenkins_other_name": "ai-summarize"
+  },
   "cerf8": {
     "elk_name": "cerf",
     "stack_name": "cerf-stack",
