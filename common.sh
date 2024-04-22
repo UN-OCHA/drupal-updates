@@ -3,8 +3,9 @@
 # Functions that can be used by other updating scripts.
 
 # TODO
-# Adapt 'open' and 'copy' commands for macOS and windows too.
+# Check 'open' and 'copy' commands for macOS.
 
+# TODO running with `e` flag caused issues with vrt exit status, check the fix.
 set -eu
 
 requires() {
@@ -15,6 +16,7 @@ requires() {
 }
 
 requires "composer"
+requires "composer-lock-diff"
 requires "curl"
 requires "docker"
 requires "git"
@@ -42,17 +44,17 @@ wait_to_continue() {
 }
 
 # Open url.
-# TODO: get this working for MacOS etc, and to give a warning if it fails.
 open_url() {
-  (command -v xdg-open >/dev/null 2>&1) &&
-    xdg-open "$1"
+  ( (command -v xdg-open >/dev/null 2>&1) && xdg-open "$1" 2> /dev/null ) ||
+    python3 -m webbrowser "$1"
 }
 
 # Copy to both the selection buffer and clipboard with xclip.
-# TODO: get this working for MacOS etc, and to give a warning if it fails.
 copy_to_clipboard() {
-  (command -v xclip >/dev/null 2>&1) &&
-    echo "$1" | xclip -i -sel c -f | xclip -i -sel p
+  ( (command -v xclip >/dev/null 2>&1) &&
+    echo "$1" | xclip -i -sel c -f | xclip -i -sel p ) ||
+  ( (command -v pbcopy >/dev/null 2>&1) &&
+    echo "$1" | pbcopy )
 }
 
 update_branches() {
@@ -207,7 +209,7 @@ run_vrt() {
     # statuses=( 'anon' 'auth' )
     statuses=('anon')
     for status in "${statuses[@]}"; do
-      docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run "${stage}"
+      docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run "${stage}" || ( echo "Mismatches found" && exit 0 )
     done
 
     cd - || exit
@@ -281,7 +283,32 @@ create_pr() {
 }
 
 dev_communications() {
+
   echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
+  echo "Continue for Jira board and git commits since last deploy."
+
+  wait_to_continue
+
+  for repo in "${repolist[@]}"; do
+    jira_name=$(jq -r '."'"$repo"'".jira_name' <./repo-lookup.json)
+    if [ "$jira_name" != "n/a" ]; then
+      echo "Opening jira board for ${repo}"
+      "$JIRA_BROWSER" "https://humanitarian.atlassian.net/browse/$jira_name"
+    fi
+
+    echo "Git logs and module updates for ${repo} printed below to show changes"
+    cd "${full_path}/${repo}" || exit
+    git fetch --prune
+    git checkout develop
+    git pull
+    latest_tag_raw=$(git rev-list --tags --max-count=1)
+    latest_tag=$(git describe --tags "$latest_tag_raw")
+    git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
+    composer-lock-diff --from main --to develop --only-prod | less
+    cd - || exit
+    wait_to_continue
+  done
+  echo "All done"
 }
 
 vrt_comparison() {
@@ -318,20 +345,28 @@ vrt_comparison() {
     done
   fi
 
-  echo "Opening jenkins vrt output to check results of VRT jobs."
-  echo "Will need to wait till jobs are finished before results are available."
+  echo "When VRT jobs are finished and results are available, use these links to check results."
   for url in "${results[@]}"; do
     echo "$url"
-    open_url "$url"
   done
 
 }
 
 merge_to_main() {
 
-  echo "Opening pull requests."
+  echo "Listing package differences and opening pull requests."
+  echo "List the main Jira tickets as ## Chores ## Fixes ## Features etc."
+  echo "Copy drupal package differences to ## Updates section"
+  wait_to_continue
   for repo in "${repolist[@]}"; do
+
+    cd "${full_path}/${repo}" || exit
+    echo "Package changes for ${repo}"
+    composer-lock-diff --from main --to develop --only-prod --md
+    cd - || exit
+
     open_url "${remote_url}/${repo}/compare/main...develop"
+    wait_to_continue
   done
 }
 
@@ -360,19 +395,21 @@ create_tags() {
     open_url "${url}"
   done
 
-  echo "Adjust date and tag version if necessary - use 'Generate release notes' button to summarize changes."
+  echo "Adjust date and tag version if necessary"
+  echo "Use 'Generate release notes' button to summarize changes."
+  echo "Then copy description from PR to main."
 }
 
 stage_deploy() {
-  echo "Preparing stage deployments."
-  echo "Step one, refresh databases from production."
+  echo "Deploying to stage - with a reset to what we have on production first."
   for repo in "${repolist[@]}"; do
     # Match repo to other names.
-    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json)
+    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json | sed 's/ /%20/' )
     jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' <./repo-lookup.json)
 
-    echo "Opening jenkins test deploy link for $repo."
-    open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-testdeploy/build"
+    echo "Links for jenkins test deploy for $repo."
+    echo "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-testdeploy/build"
+    # open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-testdeploy/build"
   done
 
   echo "All done"
@@ -416,6 +453,7 @@ prod_deploy() {
   echo "All done"
 
   echo "Follow-up steps:"
-  echo "Check open Jira tickets and update as necessary."
+  echo "Add links to deployed tags to the Jira ticket."
+  echo "Check all open Jira tickets and update as necessary."
   echo "Run module audit script and update the spreadsheet."
 }

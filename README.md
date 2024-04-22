@@ -23,6 +23,8 @@ Most other requirements: docker, composer, git, curl, etc. will already exist.
 The deploy script requires `jq`
 on Ubuntu `sudo apt install jq`
 for others: https://jqlang.github.io/jq/download/
+and `composer-lock-diff`
+`composer global require davidrjonas/composer-lock-diff:^1.0`
 
 The module audit script requires `libxml2-utils`:
 on Ubuntu `sudo apt install libxml2-utils`
@@ -56,7 +58,6 @@ https://cerf.un.org/what-we-do/allocation-pdf/2021/summary/21-RR-COL-49434
 to see if it returns a pdf.
 
 ## TODO
-* Adapt 'open' and 'copy' commands for macOS, and windows.
 * Complete movement of uses of vrt from local to Jenkins.
 
 ## Assumptions:
