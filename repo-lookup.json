@@ -6,7 +6,8 @@
     "stage_url": "stage.summary-ai-unocha-org.ahconu.org",
     "prod_url": "summary.ai.unocha.org",
     "jenkins_name": "AI Summarize",
-    "jenkins_other_name": "ai-summarize"
+    "jenkins_other_name": "ai-summarize",
+    "jira_name": "n/a"
   },
   "cerf8": {
     "elk_name": "cerf",
@@ -15,7 +16,8 @@
     "stage_url": "stage.cerf-un-org.ahconu.org",
     "prod_url": "cerf.un.org",
     "jenkins_name": "CERF",
-    "jenkins_other_name": "cerf"
+    "jenkins_other_name": "cerf",
+    "jira_name": "CERF"
   },
   "common-design-site": {
     "elk_name": "commondesign",
@@ -24,7 +26,8 @@
     "stage_url": "stage.commondesign-unocha-org.ahconu.org",
     "prod_url": "web.brand.unocha.org",
     "jenkins_name": "Common Design",
-    "jenkins_other_name": "ds-commondesign"
+    "jenkins_other_name": "ds-commondesign",
+    "jira_name": "CD"
   },
   "drupal-starterkit": {
     "elk_name": "n/a",
@@ -33,7 +36,18 @@
     "stage_url": "n/a",
     "prod_url": "n/a",
     "jenkins_name": "n/a",
-    "jenkins_other_name": "n/a"
+    "jenkins_other_name": "n/a",
+    "jira_name": "n/a"
+  },
+  "dsr-site": {
+    "elk_name": "dsr",
+    "stack_name": "n/a",
+    "dev_url": "dev.reports-unocha-org.ahconu.org",
+    "stage_url": "stage.reports-unocha-org.ahconu.org",
+    "prod_url": "n/a",
+    "jenkins_name": "Reports",
+    "jenkins_other_name": "dsr",
+    "jira_name": "DSR"
   },
   "gms-site": {
     "elk_name": "gms",
@@ -42,7 +56,8 @@
     "stage_url": "stage.gms-unocha-org.ahconu.org",
     "prod_url": "gms.unocha.org",
     "jenkins_name": "GMS",
-    "jenkins_other_name": "gms"
+    "jenkins_other_name": "gms",
+    "jira_name": "n/a"
   },
   "iasc8": {
     "elk_name": "iasc",
@@ -51,7 +66,8 @@
     "stage_url": "stage.interagencystandingcommittee-org.ahconu.org",
     "prod_url": "interagencystandingcommittee.org",
     "jenkins_name": "IASC",
-    "jenkins_other_name": "iasc"
+    "jenkins_other_name": "iasc",
+    "jira_name": "IASC"
   },
   "odsg8-site": {
     "elk_name": "odsg",
@@ -60,7 +76,8 @@
     "stage_url": "stage.odsg-unocha-org.ahconu.org",
     "prod_url": "odsg.unocha.org",
     "jenkins_name": "ODSG",
-    "jenkins_other_name": "odsg"
+    "jenkins_other_name": "odsg",
+    "jira_name": "ODSG"
   },
   "response-site": {
     "elk_name": "response",
@@ -69,7 +86,8 @@
     "stage_url": "stage.response-reliefweb-int.ahconu.org",
     "prod_url": "response.reliefweb.int",
     "jenkins_name": "Response",
-    "jenkins_other_name": "response"
+    "jenkins_other_name": "response",
+    "jira_name": "RWR"
   },
   "rwint9-site": {
     "elk_name": "rwint",
@@ -78,7 +96,8 @@
     "stage_url": "stage.reliefweb-int.ahconu.org",
     "prod_url": "reliefweb.int",
     "jenkins_name": "ReliefWeb",
-    "jenkins_other_name": "rwint-site"
+    "jenkins_other_name": "rwint-site",
+    "jira_name": "RW"
   },
   "slt8-site": {
     "elk_name": "slt",
@@ -87,7 +106,8 @@
     "stage_url": "stage.savinglivestogether-unocha-org.ahconu.org",
     "prod_url": "savinglivestogether.unocha.org",
     "jenkins_name": "SLT",
-    "jenkins_other_name": "slt"
+    "jenkins_other_name": "slt",
+    "jira_name": "SLT"
   },
   "sesame-site": {
     "elk_name": "sesame",
@@ -96,7 +116,8 @@
     "stage_url": "stage.auth-unocha-org.ahconu.org",
     "prod_url": "auth.ahconu.org",
     "jenkins_name": "Sesame",
-    "jenkins_other_name": "sesame"
+    "jenkins_other_name": "sesame",
+    "jira_name": "n/a"
   },
   "unocha-site": {
     "elk_name": "unocha",
@@ -105,7 +126,8 @@
     "stage_url": "stage.unocha-org.ahconu.org",
     "prod_url": "unocha.org",
     "jenkins_name": "UN-OCHA",
-    "jenkins_other_name": "unocha"
+    "jenkins_other_name": "unocha",
+    "jira_name": "UNO"
   },
   "whd-2023-site": {
     "elk_name": "whd",
@@ -114,6 +136,7 @@
     "stage_url": "stage.worldhumanitarianday-org.ahconu.org",
     "prod_url": "worldhumanitarianday.org",
     "jenkins_name": "WHD",
-    "jenkins_other_name": "whd"
+    "jenkins_other_name": "whd",
+    "jira_name": "WHD"
   }
 }

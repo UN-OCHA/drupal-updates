@@ -56,7 +56,6 @@ https://cerf.un.org/what-we-do/allocation-pdf/2021/summary/21-RR-COL-49434
 to see if it returns a pdf.
 
 ## TODO
-* Adapt 'open' and 'copy' commands for macOS, and windows.
 * Complete movement of uses of vrt from local to Jenkins.
 
 ## Assumptions:
