@@ -44,7 +44,7 @@
     "stack_name": "n/a",
     "dev_url": "dev.reports-unocha-org.ahconu.org",
     "stage_url": "stage.reports-unocha-org.ahconu.org",
-    "prod_url": "n/a",
+    "prod_url": "reports-preview.unocha.org",
     "jenkins_name": "Reports",
     "jenkins_other_name": "dsr",
     "jira_name": "DSR"

@@ -26,16 +26,16 @@ wait_to_continue
 # Choose stage.
 # Get type of update.
 echo "Choose stage of updates"
-options=("send dev communications" "vrt comparison of prod and dev" "merge to main" "create tags" "stage_deploy" "send deploy communications" "prod deploy")
+options=("vrt comparison of prod and dev" "send dev communications" "merge to main" "create tags" "stage_deploy" "send deploy communications" "prod deploy")
 select stage in "${options[@]}"; do
   case $stage in
-  "send dev communications")
-    dev_communications
+  "vrt comparison of prod and dev")
+    vrt_comparison
 
     break
     ;;
-  "vrt comparison of prod and dev")
-    vrt_comparison
+  "send dev communications")
+    dev_communications
 
     break
     ;;

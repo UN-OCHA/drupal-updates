@@ -101,9 +101,9 @@ for type in "${options[@]}"; do
   done
 done
 
-spreadsheet_url="https://docs.google.com/spreadsheets/d/1iMSJE5Lhk86m0lBWLE1R64QFGxZhFUfmconmmyu3XAU/edit"
+spreadsheet_url="https://unitednations.sharepoint.com/:x:/r/sites/OCHAIMB/Digital%20Services%20Section/06_Projects/Developer%20documentation%20and%20standards/Drupal%20sites%20package%20version%20overview.xlsx?d=w95705de2bf904ed4816e200cdcc2b1b8&csf=1&web=1&e=6XV9K0"
 copy_to_clipboard "${spreadsheet_url}"
 
-echo "Spreadsheet url ${spreadsheet_url} copied to the clipboard. Use File"
-echo " > Import to update the relevant sheets, then select 'Replace current"
-echo "sheet' in the 'Import Location' dropdown."
+echo "Spreadsheet url ${spreadsheet_url} copied to the clipboard."
+echo "Best way to update the spreadsheet so far is to open each csv file in a"
+echo "sheet locally, then copy and paste to the relevant sheet."
