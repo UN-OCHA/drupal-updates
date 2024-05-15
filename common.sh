@@ -27,6 +27,8 @@ remote_url=$REMOTE_URL
 full_path=$BASEDIR
 jenkins_url=$JENKINS_URL
 
+communications_spreadsheet_url="https://unitednations.sharepoint.com/:x:/r/sites/OCHAIMB/Digital%20Services%20Section/06_Projects/Developer%20documentation%20and%20standards/Deployment%20communications.xlsx?d=w2438877454944452a3fd63a63b3d5870&csf=1&web=1&e=dkJ9El"
+
 # Get repolist from repolist.txt
 repolist=()
 echo "List of repos to work on:"
@@ -284,7 +286,7 @@ create_pr() {
 
 dev_communications() {
 
-  echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
+  echo "Check ${communications_spreadsheet_url} for communication steps"
   echo "Continue for Jira board and git commits since last deploy."
 
   wait_to_continue
@@ -312,44 +314,68 @@ dev_communications() {
 }
 
 vrt_comparison() {
-  echo "This uses vrt to open some links on the dev sites and compare them to"
-  echo "the same links on the production site."
+  echo "Testing differences between dev and prod instances"
+  for repo in "${repolist[@]}" ; do
 
-  # Check we have a Jenkins API token.
-  if [[ $JENKINS_TOKEN = '' ]]; then
-    echo "A Jenkins API token is needed and should be defined in the .env file."
-    echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
-  else
+    if [[ $repo = "docstore-site" ]]
+    then
+      continue
+    fi
 
-    # This gets the previous build number for the jenkins job. We will augment it for each run.
-    build_number=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastCompletedBuild.number" | tr -d '"')
+    stages=('reference' 'test')
+    for stage in "${stages[@]}" ; do
+      case $stage in
+        "reference" )
+          environment="prod" ;;
+        "test" )
+          environment="dev" ;;
+      esac
+      echo "Running $stage stage for $repo"
+      run_vrt "$repo" "$stage" "$environment"
+    done;
 
-    results=("https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/")
-    for repo in "${repolist[@]}"; do
-      build_number=$((build_number + 1))
+    vrt_report "$repo"
+  done;
 
-      if [[ $repo = "docstore-site" ]]; then
-        continue
-      fi
+#  echo "This uses vrt to open some links on the dev sites and compare them to"
+#  echo "the same links on the production site."
+#
+#  # Check we have a Jenkins API token.
+#  if [[ $JENKINS_TOKEN = '' ]]; then
+#    echo "A Jenkins API token is needed and should be defined in the .env file."
+#    echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
+#  else
+#
+#    # This gets the previous build number for the jenkins job. We will augment it for each run.
+#    build_number=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastCompletedBuild.number" | tr -d '"')
+#
+#    results=("https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/")
+#    for repo in "${repolist[@]}"; do
+#      build_number=$((build_number + 1))
+#
+#      if [[ $repo = "docstore-site" ]]; then
+#        continue
+#      fi
+#
+#      # Match repo to other names.
+#      prod_url=$(jq -r '."'"$repo"'".prod_url' <./repo-lookup.json)
+#      prod_url="https://$prod_url"
+#      dev_url=$(jq -r '."'"$repo"'".dev_url' <./repo-lookup.json)
+#      dev_url="https://$BASIC_AUTH_CREDENTIALS@$dev_url"
+#
+#      echo "Kicking off jenkins vrt job for $repo."
+#      curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
+#
+#      results+=("https://jenkins.aws.ahconu.org/job/vrt-anonymous/${build_number}/artifact/data/anon/html_report/index.html")
+#    done
+#  fi
+#
+#  echo "When VRT jobs are finished and results are available, use these links to check results."
+#  for url in "${results[@]}"; do
+#    echo "$url"
+#  done
 
-      # Match repo to other names.
-      prod_url=$(jq -r '."'"$repo"'".prod_url' <./repo-lookup.json)
-      prod_url="https://$prod_url"
-      dev_url=$(jq -r '."'"$repo"'".dev_url' <./repo-lookup.json)
-      dev_url="https://$BASIC_AUTH_CREDENTIALS@$dev_url"
-
-      echo "Kicking off jenkins vrt job for $repo."
-      curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
-
-      results+=("https://jenkins.aws.ahconu.org/job/vrt-anonymous/${build_number}/artifact/data/anon/html_report/index.html")
-    done
-  fi
-
-  echo "When VRT jobs are finished and results are available, use these links to check results."
-  for url in "${results[@]}"; do
-    echo "$url"
-  done
-
+  echo "All done"
 }
 
 merge_to_main() {
@@ -360,14 +386,25 @@ merge_to_main() {
   wait_to_continue
   for repo in "${repolist[@]}"; do
 
+    open_url "${remote_url}/${repo}/compare/main...develop"
+
     cd "${full_path}/${repo}" || exit
+    echo "Git logs for ${repo} printed below to show changes"
+    cd "${full_path}/${repo}" || exit
+    latest_tag_raw=$(git rev-list --tags --max-count=1)
+    latest_tag=$(git describe --tags "$latest_tag_raw")
+    git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
+
+    git fetch --prune
+    git checkout develop
+    git pull
     echo "Package changes for ${repo}"
     composer-lock-diff --from main --to develop --only-prod --md
     cd - || exit
 
-    open_url "${remote_url}/${repo}/compare/main...develop"
     wait_to_continue
   done
+  echo "All done"
 }
 
 create_tags() {
@@ -416,7 +453,7 @@ stage_deploy() {
 }
 
 deploy_communications() {
-  echo "Check https://docs.google.com/spreadsheets/d/1db2o3SG52uPG0SlbNuj9YyIvnqSPmCND9wQaaaC0i1Y/edit#gid=0 for communication steps"
+  echo "Check ${communications_spreadsheet_url} for communication steps"
 }
 
 prod_deploy() {

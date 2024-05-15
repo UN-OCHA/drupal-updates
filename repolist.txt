@@ -18,4 +18,3 @@ unocha-site
 # Non-drupal repos to keep in mind
 # ocha-api-site
 # rwint-api
-# rwint-mobile
