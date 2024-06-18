@@ -189,10 +189,14 @@ check_extra() {
     test_page="https://cerf.un.org/what-we-do/allocation-pdf/2021/summary/21-RR-COL-49434"
     curl -L -s "$test_page" | grep -iF "%%EOF" || echo "Didn't get a PDF returned. Check this!"
     wait_to_continue
+    echo "Check the Publications page is doing okay"
+    echo "If not, it may need multiple cache clears"
+    open_url "https://cerf.un.org/about-us/publications"
+    wait_to_continue
   elif [[ $repo = "other" ]]; then
     echo "additional checks here"
   else
-    echo "No checks for $repo"
+    echo "No additional checks for $repo"
   fi
 }
 
@@ -489,8 +493,26 @@ prod_deploy() {
   done
   echo "All done"
 
+}
+
+post_deployment() {
   echo "Follow-up steps:"
   echo "Add links to deployed tags to the Jira ticket."
+  echo "These tags have been deployed - changes are listed on the tag pages:" > data/latest_tags.txt
+  for repo in "${repolist[@]}"; do
+    echo "cd-ing to the $repo repo"
+    jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json )
+    cd "${full_path}/${repo}" || exit
+    latest_tag_id=$(git rev-list --tags --max-count=1)
+    if [ "$latest_tag_id" = "" ]; then
+      cd - || exit
+      continue
+    fi
+    latest_tag=$(git describe --tags "${latest_tag_id}")
+    cd - || exit
+    echo " * $jenkins_name - __${latest_tag}__ - ${remote_url}/${repo}/releases/tag/${latest_tag}" >> data/latest_tags.txt
+
+  done
   echo "Check all open Jira tickets and update as necessary."
   echo "Run module audit script and update the spreadsheet."
 }
