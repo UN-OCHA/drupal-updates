@@ -69,6 +69,7 @@ A dictionary to match repo names to e.g. jenkins names, elk name, and prod url.
 1. stage deploy
 1. send more communications
 1. prod deploy - including post-deployment tests
+2. post deployment - update tickets and tidy up
 
 ## Post deployment tests
 * GTM (see `check_gtm` function in `common.sh`).
@@ -77,9 +78,6 @@ This curls the homepage and checks for the 'GTM-' string.
 Checks
 https://cerf.un.org/what-we-do/allocation-pdf/2021/summary/21-RR-COL-49434
 to see if it returns a pdf.
-
-## TODO
-* Complete movement of uses of vrt from local to Jenkins.
 
 ## Assumptions:
 * all the repositories are in the same parent directory
