@@ -200,49 +200,24 @@ check_extra() {
   fi
 }
 
-run_vrt() {
-  repo="$1"
-  stage="$2"
-  environment="$3"
-
-  if [ ! -d "../tools-vrt" ]; then
-    echo "This command assumes the Tools-vrt repo is checked out in the same"
-    echo "directory as this 'updates' repo, and cannot run without it."
-  else
-    cd ../tools-vrt || exit
-
-    # TODO revise VRT logins so it works with authenticated users too.
-    # statuses=( 'anon' 'auth' )
-    statuses=('anon')
-    for status in "${statuses[@]}"; do
-      docker run -u "$(id -u)" --shm-size 512m --rm --name "${stage}" --net="host" --entrypoint npm -e REPO="${repo}" -e LOGGED_IN_STATUS="${status}" -e ENVIRONMENT="${environment}" -v "$(pwd):/srv" -v "$(pwd)/data/${repo}:/srv/data" -v "$(pwd)/config:/srv/config" -w /srv public.ecr.aws/unocha/vrt:local run "${stage}" || ( echo "Mismatches found" && exit 0 )
-    done
-
-    cd - || exit
-  fi
-}
-
 vrt_report() {
   repo="$1"
-
-  cd ../tools-vrt || exit
 
   # TODO revise VRT logins so it works with authenticated users too.
   # statuses=( 'anon' 'auth' )
   statuses=('anon')
   for status in "${statuses[@]}"; do
-    file="file://$(pwd)/data/${repo}/${status}/html_report/index.html"
-    echo "Opening $file in browser"
-    open_url "$file"
+    url="https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/lastCompletedBuild/artifact/data/anon/html_report/index.html"
+    echo "Opening $url in browser"
+    open_url "$url"
   done
-
-  cd - || exit
 
   # Match repo name to elk name.
   elk_name=$(jq -r '."'"$repo"'".elk_name' <./repo-lookup.json)
   echo "Opening ELK report for $elk_name"
 
-  log_url="https://elk.aws.ahconu.org/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(unocha.property,drupal.action,drupal.message,drupal.request_uri,syslog.severity_label,unocha.environment),filters:!(('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:unocha.property,negate:!f,params:!(${elk_name}),type:phrases),query:(bool:(minimum_should_match:1,should:!((match_phrase:(unocha.property:${elk_name})))))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:informational),type:phrase),query:(match_phrase:(syslog.severity_label:informational))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:debug),type:phrase),query:(match_phrase:(syslog.severity_label:debug))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:notice))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:warning))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:drupal.action,negate:!t,params:(query:'access%20denied'),type:phrase),query:(match_phrase:(drupal.action:'access%20denied'))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:drupal.action,negate:!t,params:(query:user_expire),type:phrase),query:(match_phrase:(drupal.action:user_expire)))),index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+  # TODO: this url works, but surely could be more concise.
+  log_url="https://elk.aws.ahconu.org/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(unocha.property,drupal.action,drupal.message,drupal.request_uri,syslog.severity_label,unocha.environment),filters:!(('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:unocha.property,negate:!f,params:!(${elk_name}),type:phrases),query:(bool:(minimum_should_match:1,should:!((match_phrase:(unocha.property:${elk_name})))))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:informational),type:phrase),query:(match_phrase:(syslog.severity_label:informational))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:debug),type:phrase),query:(match_phrase:(syslog.severity_label:debug))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:notice))),('\$state':(store:appState),meta:(alias:!n,disabled:!f,index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',key:syslog.severity_label,negate:!t,params:(query:notice),type:phrase),query:(match_phrase:(syslog.severity_label:warning)))),index:'69b486f0-81d4-11ea-9a40-e9f42857bb64',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
   open_url "$log_url"
 }
 
@@ -291,7 +266,8 @@ create_pr() {
 dev_communications() {
 
   echo "Check ${communications_spreadsheet_url} for communication steps"
-  echo "Continue for Jira board and git commits since last deploy."
+
+  echo "Continue to open Jira boards for each site and to list the git commits since last deploy."
 
   wait_to_continue
 
@@ -307,6 +283,9 @@ dev_communications() {
     git fetch --prune
     git checkout develop
     git pull
+    if [ "$(git rev-list --tags --max-count=1)" -eq '' ]; then
+      continue
+    fi
     latest_tag_raw=$(git rev-list --tags --max-count=1)
     latest_tag=$(git describe --tags "$latest_tag_raw")
     git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
@@ -314,70 +293,39 @@ dev_communications() {
     cd - || exit
     wait_to_continue
   done
+
   echo "All done"
+
 }
 
 vrt_comparison() {
-  echo "Testing differences between dev and prod instances"
-  for repo in "${repolist[@]}" ; do
+  echo "This uses vrt to open some links on the dev sites and compare them to"
+  echo "the same links on the production site."
 
-    if [[ $repo = "docstore-site" ]]
-    then
-      continue
-    fi
+  # Check we have a Jenkins API token.
+  if [[ $JENKINS_TOKEN = '' ]]; then
+    echo "A Jenkins API token is needed and should be defined in the .env file."
+    echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
+  else
 
-    stages=('reference' 'test')
-    for stage in "${stages[@]}" ; do
-      case $stage in
-        "reference" )
-          environment="prod" ;;
-        "test" )
-          environment="dev" ;;
-      esac
-      echo "Running $stage stage for $repo"
-      run_vrt "$repo" "$stage" "$environment"
-    done;
+    for repo in "${repolist[@]}"; do
 
-    vrt_report "$repo"
-  done;
+      # Match repo to other names.
+      prod_url=$(jq -r '."'"$repo"'".prod_url' <./repo-lookup.json)
+      prod_url="https://$prod_url"
+      dev_url=$(jq -r '."'"$repo"'".dev_url' <./repo-lookup.json)
+      dev_url="https://$BASIC_AUTH_CREDENTIALS@$dev_url"
 
-#  echo "This uses vrt to open some links on the dev sites and compare them to"
-#  echo "the same links on the production site."
-#
-#  # Check we have a Jenkins API token.
-#  if [[ $JENKINS_TOKEN = '' ]]; then
-#    echo "A Jenkins API token is needed and should be defined in the .env file."
-#    echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
-#  else
-#
-#    # This gets the previous build number for the jenkins job. We will augment it for each run.
-#    build_number=$(curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/api/json" | jq ".lastCompletedBuild.number" | tr -d '"')
-#
-#    results=("https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/")
-#    for repo in "${repolist[@]}"; do
-#      build_number=$((build_number + 1))
-#
-#      if [[ $repo = "docstore-site" ]]; then
-#        continue
-#      fi
-#
-#      # Match repo to other names.
-#      prod_url=$(jq -r '."'"$repo"'".prod_url' <./repo-lookup.json)
-#      prod_url="https://$prod_url"
-#      dev_url=$(jq -r '."'"$repo"'".dev_url' <./repo-lookup.json)
-#      dev_url="https://$BASIC_AUTH_CREDENTIALS@$dev_url"
-#
-#      echo "Kicking off jenkins vrt job for $repo."
-#      curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
-#
-#      results+=("https://jenkins.aws.ahconu.org/job/vrt-anonymous/${build_number}/artifact/data/anon/html_report/index.html")
-#    done
-#  fi
-#
-#  echo "When VRT jobs are finished and results are available, use these links to check results."
-#  for url in "${results[@]}"; do
-#    echo "$url"
-#  done
+      echo "Kicking off jenkins vrt job for $repo."
+      curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
+      open_url "${jenkins_url}/view/VRT/job/vrt-anonymous"
+
+      echo "When VRT job has finished, check results and continue."
+      wait_to_continue
+      vrt_report "$repo"
+
+    done
+  fi
 
   echo "All done"
 }
@@ -385,7 +333,8 @@ vrt_comparison() {
 merge_to_main() {
 
   echo "Listing package differences and opening pull requests."
-  echo "List the main Jira tickets as ## Chores ## Fixes ## Features etc."
+  echo "List the main Jira tickets as:"
+  printf "## Chores\n\n## Fixes\n\n## Features\n\n## Updates"
   echo "Copy drupal package differences to ## Updates section"
   wait_to_continue
   for repo in "${repolist[@]}"; do
@@ -395,6 +344,9 @@ merge_to_main() {
     cd "${full_path}/${repo}" || exit
     echo "Git logs for ${repo} printed below to show changes"
     cd "${full_path}/${repo}" || exit
+    if [ "$(git rev-list --tags --max-count=1)" -eq '' ]; then
+      continue
+    fi
     latest_tag_raw=$(git rev-list --tags --max-count=1)
     latest_tag=$(git describe --tags "$latest_tag_raw")
     git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
@@ -468,9 +420,6 @@ prod_deploy() {
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json)
     jenkins_other_name=$(jq -r '."'"$repo"'".jenkins_other_name' <./repo-lookup.json)
 
-    echo "Running pre-deploy VRT for reference."
-    run_vrt "$repo" reference prod
-
     echo "Opening jenkins links for $repo."
     open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-prod-login-url/build"
     open_url "${jenkins_url}/view/${jenkins_name}/job/${jenkins_other_name}-prod-deploy/build"
@@ -484,13 +433,11 @@ prod_deploy() {
     echo "Running any site-specific tests"
     check_extra "$repo"
 
-    echo "Running post-deploy VRT for comparison."
-    run_vrt "$repo" test prod
-
-    echo "Opening VRT reports"
+    echo "Opening VRT report"
     vrt_report "$repo"
 
   done
+
   echo "All done"
 
 }
