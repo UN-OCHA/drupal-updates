@@ -336,6 +336,7 @@ merge_to_main() {
   echo "List the main Jira tickets as:"
   printf "## Chores\n\n## Fixes\n\n## Features\n\n## Updates"
   echo "Copy drupal package differences to ## Updates section"
+  echo "For an example, look at last month's merge to main"
   wait_to_continue
   for repo in "${repolist[@]}"; do
 
@@ -391,6 +392,7 @@ create_tags() {
   echo "Adjust date and tag version if necessary"
   echo "Use 'Generate release notes' button to summarize changes."
   echo "Then copy description from PR to main."
+  echo "For an example, look at last month's tag descriptions."
 }
 
 stage_deploy() {
