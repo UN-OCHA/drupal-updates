@@ -14,7 +14,7 @@ There are four separate scripts:
 * `reset_branches.sh` A helper for the module audit script - checkout and update
 develop and main branches and install dependencies for each repo.
 
-## Background
+## Best practices to avoid deploying unready changes
 
 This section copied from a discussion on OPS-10218.
 
@@ -26,7 +26,7 @@ Merging to main can happen whenever a feature is completed. It will normally be 
 Branches for security deployments should be made from the currently deployed tag, not from main.
 Any changes deployed to production should be merged back into develop and main.
 
-### Communication:
+### Communication
 Communicate all changes that you judge would be useful for others to know about. (But beware of information overload.)
 PR descriptions should be more consistent: useful PR title, ticket reference, short description of the changes (with a bit of background if complex), test steps and/or any information about what to expect, what to be careful about when reviewing etc.
 
@@ -48,6 +48,7 @@ and `composer-lock-diff`
 
 The module audit script requires `libxml2-utils`:
 on Ubuntu `sudo apt install libxml2-utils`
+TODO: check if this is already installed for MacOS
 
 ## Configuration files
 
