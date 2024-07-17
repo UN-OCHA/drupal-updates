@@ -207,7 +207,7 @@ vrt_report() {
   # statuses=( 'anon' 'auth' )
   statuses=('anon')
   for status in "${statuses[@]}"; do
-    url="https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous/lastCompletedBuild/artifact/data/anon/html_report/index.html"
+    url="https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous-step/lastCompletedBuild/artifact/data/${status}/html_report/index.html"
     echo "Opening $url in browser"
     open_url "$url"
   done
@@ -283,7 +283,7 @@ dev_communications() {
     git fetch --prune
     git checkout develop
     git pull
-    if [ "$(git rev-list --tags --max-count=1)" -eq '' ]; then
+    if [ -z "$(git rev-list --tags --max-count=1)" ]; then
       continue
     fi
     latest_tag_raw=$(git rev-list --tags --max-count=1)
@@ -316,6 +316,10 @@ vrt_comparison() {
       dev_url=$(jq -r '."'"$repo"'".dev_url' <./repo-lookup.json)
       dev_url="https://$BASIC_AUTH_CREDENTIALS@$dev_url"
 
+      if [ "$jenkins_name" = "n/a" ]; then
+        continue
+      fi
+
       echo "Kicking off jenkins vrt job for $repo."
       curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
       open_url "${jenkins_url}/view/VRT/job/vrt-anonymous"
@@ -334,7 +338,7 @@ merge_to_main() {
 
   echo "Listing package differences and opening pull requests."
   echo "List the main Jira tickets as:"
-  printf "## Chores\n\n## Fixes\n\n## Features\n\n## Updates"
+  printf "## Chores\n\n## Fixes\n\n## Features\n\n## Updates\n\n"
   echo "Copy drupal package differences to ## Updates section"
   echo "For an example, look at last month's merge to main"
   wait_to_continue
@@ -345,7 +349,7 @@ merge_to_main() {
     cd "${full_path}/${repo}" || exit
     echo "Git logs for ${repo} printed below to show changes"
     cd "${full_path}/${repo}" || exit
-    if [ "$(git rev-list --tags --max-count=1)" -eq '' ]; then
+    if [ -z "$(git rev-list --tags --max-count=1)" ]; then
       continue
     fi
     latest_tag_raw=$(git rev-list --tags --max-count=1)
@@ -452,6 +456,9 @@ post_deployment() {
     echo "cd-ing to the $repo repo"
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json )
     cd "${full_path}/${repo}" || exit
+    if [ -z "$(git rev-list --tags --max-count=1)" ]; then
+      continue
+    fi
     latest_tag_id=$(git rev-list --tags --max-count=1)
     if [ "$latest_tag_id" = "" ]; then
       cd - || exit
