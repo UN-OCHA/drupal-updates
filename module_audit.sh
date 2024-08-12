@@ -28,6 +28,7 @@ options=("full" "outdated")
 
 for type in "${options[@]}"; do
   if [[ "$type" == "full" ]]; then
+    # Option for composer.
     option=""
     fields="1,2"
     base_output_file="modulelist.csv"
@@ -53,11 +54,17 @@ for type in "${options[@]}"; do
         extra=""
         # Check if this module is the same as on main
         cd "${full_path}/${repo}" || exit
-        git diff -w -U1 main composer.lock | tr '\n' ' ' >main.diff
-        if grep "drupal/${module_name}\",.*-.*\"version" main.diff; then
-          extra="$extra - Not as Main"
+        if [ -n "$(git diff -w --word-diff -U1 main composer.lock)" ]; then
+          main_version=$(git diff -w --word-diff -U1 main composer.lock | sed -n "/\"name\": \"drupal\/${module_name}\",/{n;p}" | sed -e 's/.*-"\(.*\)",-.*/\1/')
+          if [ -n "$main_version" ]; then
+            extra="$extra - Main on ${main_version}"
+          fi
         fi
-        rm main.diff
+        # git diff -w -U1 main composer.lock | tr '\n' ' ' >main.diff
+        # if grep "drupal/${module_name}\",.*-.*\"version" main.diff; then
+        #   extra="$extra - Not as Main"
+        # fi
+        # rm main.diff
         cd - || exit
         # Add whether module is patched or pinned.
         if grep "drupal/${module_name}\":" "${full_path}/${repo}/composer.patches.json"; then
