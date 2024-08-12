@@ -450,6 +450,8 @@ prod_deploy() {
 
 post_deployment() {
   echo "Follow-up steps:"
+  echo "Run ./reset-branches.sh in another terminal window to make sure everything is up-to-date"
+  wait_to_continue
   echo "Add links to deployed tags to the Jira ticket."
   echo "These tags have been deployed - changes are listed on the tag pages:" > data/latest_tags.txt
   for repo in "${repolist[@]}"; do
@@ -457,18 +459,23 @@ post_deployment() {
     jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json )
     cd "${full_path}/${repo}" || exit
     if [ -z "$(git rev-list --tags --max-count=1)" ]; then
+      echo "No tag found. Continuing."
+      cd - || exit
       continue
     fi
     latest_tag_id=$(git rev-list --tags --max-count=1)
     if [ "$latest_tag_id" = "" ]; then
+      echo "Latest tag is empty. Continuing."
       cd - || exit
       continue
     fi
     latest_tag=$(git describe --tags "${latest_tag_id}")
+    echo "Latest tag for repo is ${latest_tag}"
     cd - || exit
     echo " * $jenkins_name - __${latest_tag}__ - ${remote_url}/${repo}/releases/tag/${latest_tag}" >> data/latest_tags.txt
 
   done
+  echo "List of latest tags is in ./data/latest_tags.txt. Copy that list to the ticket."
   echo "Check all open Jira tickets and update as necessary."
   echo "Run module audit script and update the spreadsheet."
 }

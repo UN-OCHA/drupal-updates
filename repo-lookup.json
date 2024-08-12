@@ -129,7 +129,7 @@
     "jenkins_other_name": "unocha",
     "jira_name": "UNO"
   },
-  "whd-2023-site": {
+  "whd-site": {
     "elk_name": "whd",
     "stack_name": "whd-stack",
     "dev_url": "dev.worldhumanitarianday-org.ahconu.org",
