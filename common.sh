@@ -202,12 +202,13 @@ check_extra() {
 
 vrt_report() {
   repo="$1"
+  job="$2"
 
   # TODO revise VRT logins so it works with authenticated users too.
   # statuses=( 'anon' 'auth' )
   statuses=('anon')
   for status in "${statuses[@]}"; do
-    url="https://jenkins.aws.ahconu.org/view/VRT/job/vrt-anonymous-step/lastCompletedBuild/artifact/data/${status}/html_report/index.html"
+    url="https://jenkins.aws.ahconu.org/view/VRT/job/${job}/lastCompletedBuild/artifact/data/${status}/html_report/index.html"
     echo "Opening $url in browser"
     open_url "$url"
   done
@@ -315,6 +316,7 @@ vrt_comparison() {
       prod_url="https://$prod_url"
       dev_url=$(jq -r '."'"$repo"'".dev_url' <./repo-lookup.json)
       dev_url="https://$BASIC_AUTH_CREDENTIALS@$dev_url"
+      jenkins_name=$(jq -r '."'"$repo"'".jenkins_name' <./repo-lookup.json | sed 's/ /%20/' )
 
       if [ "$jenkins_name" = "n/a" ]; then
         continue
@@ -324,9 +326,9 @@ vrt_comparison() {
       curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
       open_url "${jenkins_url}/view/VRT/job/vrt-anonymous"
 
-      echo "When VRT job has finished, check results and continue."
+      echo "When VRT job has finished, hit enter to see the results and logs."
       wait_to_continue
-      vrt_report "$repo"
+      vrt_report "$repo" "vrt-anonymous"
 
     done
   fi
@@ -440,7 +442,7 @@ prod_deploy() {
     check_extra "$repo"
 
     echo "Opening VRT report"
-    vrt_report "$repo"
+    vrt_report "$repo" "vrt-anonymous-step"
 
   done
 
