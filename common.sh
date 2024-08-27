@@ -178,6 +178,11 @@ check_gtm() {
   home="$1"
   echo "$home"
   echo "Checking for presence of GTM:"
+  ga_id=$(jq -r '."'"$repo"'".ga_dashboard' <./repo-lookup.json)
+  if [ "$ga_id" != "n/a" ]; then
+    echo "Opening GA realtime dashboard for ${repo}"
+    "$JIRA_BROWSER" "https://analytics.google.com/analytics/web/#/p${ga_id}/realtime/overview"
+  fi
   curl -L -s "$home" | grep -iF "GTM-" || echo "Not finding GTM- key. Check this!"
   wait_to_continue
 }
@@ -192,6 +197,11 @@ check_extra() {
     echo "Check the Publications page is doing okay"
     echo "If not, it may need multiple cache clears"
     open_url "https://cerf.un.org/about-us/publications"
+    wait_to_continue
+  elif [[ $repo = "unocha-site" ]]; then
+    echo "Check the CBPF page is doing okay and the homepage map is working"
+    open_url "https://www.unocha.org/country-based-pooled-funds"
+    open_url "https://www.unocha.org"
     wait_to_continue
   elif [[ $repo = "other" ]]; then
     echo "additional checks here"
