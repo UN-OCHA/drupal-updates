@@ -5,6 +5,7 @@
     "dev_url": "dev.summary-ai-unocha-org.ahconu.org",
     "stage_url": "stage.summary-ai-unocha-org.ahconu.org",
     "prod_url": "summary.ai.unocha.org",
+    "ga_dashboard": "n/a",
     "jenkins_name": "AI Summarize",
     "jenkins_other_name": "ai-summarize",
     "jira_name": "n/a"
@@ -15,6 +16,7 @@
     "dev_url": "dev.cerf-un-org.ahconu.org",
     "stage_url": "stage.cerf-un-org.ahconu.org",
     "prod_url": "cerf.un.org",
+    "ga_dashboard": "331633809",
     "jenkins_name": "CERF",
     "jenkins_other_name": "cerf",
     "jira_name": "CERF"
@@ -25,6 +27,7 @@
     "dev_url": "dev.commondesign-unocha-org.ahconu.org",
     "stage_url": "stage.commondesign-unocha-org.ahconu.org",
     "prod_url": "web.brand.unocha.org",
+    "ga_dashboard": "355487396",
     "jenkins_name": "Common Design",
     "jenkins_other_name": "ds-commondesign",
     "jira_name": "CD"
@@ -35,6 +38,7 @@
     "dev_url": "n/a",
     "stage_url": "n/a",
     "prod_url": "n/a",
+    "ga_dashboard": "n/a",
     "jenkins_name": "n/a",
     "jenkins_other_name": "n/a",
     "jira_name": "n/a"
@@ -45,6 +49,7 @@
     "dev_url": "dev.reports-unocha-org.ahconu.org",
     "stage_url": "stage.reports-unocha-org.ahconu.org",
     "prod_url": "reports-preview.unocha.org",
+    "ga_dashboard": "n/a",
     "jenkins_name": "Reports",
     "jenkins_other_name": "dsr",
     "jira_name": "DSR"
@@ -55,6 +60,7 @@
     "dev_url": "dev.gms-unocha-org.ahconu.org",
     "stage_url": "stage.gms-unocha-org.ahconu.org",
     "prod_url": "gms.unocha.org",
+    "ga_dashboard": "331633809",
     "jenkins_name": "GMS",
     "jenkins_other_name": "gms",
     "jira_name": "n/a"
@@ -65,6 +71,7 @@
     "dev_url": "dev.interagencystandingcommittee-org.ahconu.org",
     "stage_url": "stage.interagencystandingcommittee-org.ahconu.org",
     "prod_url": "interagencystandingcommittee.org",
+    "ga_dashboard": "316087615",
     "jenkins_name": "IASC",
     "jenkins_other_name": "iasc",
     "jira_name": "IASC"
@@ -75,6 +82,7 @@
     "dev_url": "dev.odsg-unocha-org.ahconu.org",
     "stage_url": "stage.odsg-unocha-org.ahconu.org",
     "prod_url": "odsg.unocha.org",
+    "ga_dashboard": "316320329",
     "jenkins_name": "ODSG",
     "jenkins_other_name": "odsg",
     "jira_name": "ODSG"
@@ -85,6 +93,7 @@
     "dev_url": "dev.response-reliefweb-int.ahconu.org",
     "stage_url": "stage.response-reliefweb-int.ahconu.org",
     "prod_url": "response.reliefweb.int",
+    "ga_dashboard": "317290560",
     "jenkins_name": "Response",
     "jenkins_other_name": "response",
     "jira_name": "RWR"
@@ -95,6 +104,7 @@
     "dev_url": "dev.reliefweb-int.ahconu.org",
     "stage_url": "stage.reliefweb-int.ahconu.org",
     "prod_url": "reliefweb.int",
+    "ga_dashboard": "291027553",
     "jenkins_name": "ReliefWeb",
     "jenkins_other_name": "rwint-site",
     "jira_name": "RW"
@@ -105,6 +115,7 @@
     "dev_url": "dev.savinglivestogether-unocha-org.ahconu.org",
     "stage_url": "stage.savinglivestogether-unocha-org.ahconu.org",
     "prod_url": "savinglivestogether.unocha.org",
+    "ga_dashboard": "317451888",
     "jenkins_name": "SLT",
     "jenkins_other_name": "slt",
     "jira_name": "SLT"
@@ -115,6 +126,7 @@
     "dev_url": "dev.auth-unocha-org.ahconu.org",
     "stage_url": "stage.auth-unocha-org.ahconu.org",
     "prod_url": "auth.ahconu.org",
+    "ga_dashboard": "n/a",
     "jenkins_name": "Sesame",
     "jenkins_other_name": "sesame",
     "jira_name": "n/a"
@@ -125,6 +137,7 @@
     "dev_url": "dev.unocha-org.ahconu.org",
     "stage_url": "stage.unocha-org.ahconu.org",
     "prod_url": "unocha.org",
+    "ga_dashboard": "280649713",
     "jenkins_name": "UN-OCHA",
     "jenkins_other_name": "unocha",
     "jira_name": "UNO"
@@ -135,6 +148,7 @@
     "dev_url": "dev.worldhumanitarianday-org.ahconu.org",
     "stage_url": "stage.worldhumanitarianday-org.ahconu.org",
     "prod_url": "worldhumanitarianday.org",
+    "ga_dashboard": "282048904",
     "jenkins_name": "WHD",
     "jenkins_other_name": "whd",
     "jira_name": "WHD"
