@@ -41,12 +41,19 @@ for type in "${options[@]}"; do
   for vendor in "${vendors[@]}"; do
     spacer=""
     packages="${vendor}/*"
-    output_file="data/${vendor}-${base_output_file}"
+    output_file="$(pwd)/data/${vendor}-${base_output_file}"
     echo "$header_row" >"$output_file"
 
     for repo in "${repolist[@]}"; do
+      echo "* * *"
+      echo "Processing repo $repo"
+      echo "* * *"
+
+      echo "cd-ing to the $repo repo"
+      cd "${full_path}/${repo}" || exit
+
       spacer+=";"
-      for module_details in $(composer show --locked --direct $option -d "${full_path}/${repo}" "${packages}" |
+      for module_details in $($COMPOSER show --locked --direct $option "${packages}" |
         tr -s " " | cut -f $fields -d ' ' --output-delimiter=";" | cut -d '/' -f 2); do
         module_name=$(echo "$module_details" | cut -d ';' -f 1)
         module_version=$(echo "$module_details" | cut -d ';' -f 2)
@@ -101,6 +108,7 @@ for type in "${options[@]}"; do
       done
       # Add a trailing semi-colon to each line.
       awk '{print $0 ";"}' "$output_file" >tmpfile.txt && mv tmpfile.txt "$output_file"
+      cd - || exit
     done
 
     LC_COLLATE=C sort "$output_file" >tmpfile.txt && mv tmpfile.txt "$output_file"
