@@ -301,7 +301,7 @@ dev_communications() {
     latest_tag_raw=$(git rev-list --tags --max-count=1)
     latest_tag=$(git describe --tags "$latest_tag_raw")
     git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
-    "$COMPOSER_LOCK_DIFF" --from main --to develop --only-prod | less
+    $COMPOSER_LOCK_DIFF --from main --to develop --only-prod | less
     cd - || exit
     wait_to_continue
   done
