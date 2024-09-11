@@ -5,7 +5,6 @@ ai-summarize-site
 cerf8
 common-design-site
 drupal-starterkit
-dsr-site
 gms-site
 iasc8
 odsg8-site

@@ -43,17 +43,6 @@
     "jenkins_other_name": "n/a",
     "jira_name": "n/a"
   },
-  "dsr-site": {
-    "elk_name": "dsr",
-    "stack_name": "n/a",
-    "dev_url": "dev.reports-unocha-org.ahconu.org",
-    "stage_url": "stage.reports-unocha-org.ahconu.org",
-    "prod_url": "reports-preview.unocha.org",
-    "ga_dashboard": "n/a",
-    "jenkins_name": "Reports",
-    "jenkins_other_name": "dsr",
-    "jira_name": "DSR"
-  },
   "gms-site": {
     "elk_name": "gms",
     "stack_name": "gms-stack",
