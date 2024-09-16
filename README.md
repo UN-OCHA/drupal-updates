@@ -19,6 +19,7 @@ develop and main branches and install dependencies for each repo.
 This section copied from a discussion on OPS-10218.
 
 ### Branch strategy
+
 Anything that has a chance of going to main can be merged to develop.
 If there's significant doubt, or it's likely to take a long time to get approval, use a feature branch.
 If we need more instances for testing feature branches, we can ask for them.
@@ -27,14 +28,17 @@ Branches for security deployments should be made from the currently deployed tag
 Any changes deployed to production should be merged back into develop and main.
 
 ### Communication
+
 Communicate all changes that you judge would be useful for others to know about. (But beware of information overload.)
 PR descriptions should be more consistent: useful PR title, ticket reference, short description of the changes (with a bit of background if complex), test steps and/or any information about what to expect, what to be careful about when reviewing etc.
 
 ### Avoiding unready changes getting to production
+
 The person doing deployments should check Jira boards for all properties to look for any tickets that are still in testing. There is now a link in the 'dev communications' step to show each project's Jira board and any changes that will be included. If the changes are already merged to develop, they should communicate with the tester and/or developer to resolve the situation.
 Significant merges to main should get reviewed and signed off by someone who is familiar with the changes.
 
 ## Requirements
+
 Jenkins ID and API token, defined in `.env` file, to kick off vrt jobs.
 See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/
 
@@ -43,8 +47,8 @@ Most other requirements: docker, composer, git, curl, etc. will already exist.
 The deploy script requires `jq`
 on Ubuntu `sudo apt install jq`
 for others: https://jqlang.github.io/jq/download/
-and `composer-lock-diff`
-`composer global require davidrjonas/composer-lock-diff:^1.0`
+and `composer-lock-diff` as part of the repo
+`composer require davidrjonas/composer-lock-diff --dev`
 
 The module audit script requires `libxml2-utils`:
 on Ubuntu `sudo apt install libxml2-utils`
