@@ -44,11 +44,11 @@ See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/
 
 Most other requirements: docker, composer, git, curl, etc. will already exist.
 
-The deploy script requires `jq`
-on Ubuntu `sudo apt install jq`
-for others: https://jqlang.github.io/jq/download/
-and `composer-lock-diff` as part of the repo
-`composer require davidrjonas/composer-lock-diff --dev`
+The deploy script requires
+
+1. `jq` on Ubuntu `sudo apt install jq` for others: https://jqlang.github.io/jq/download/
+2. `composer-lock-diff` as part of the repo `composer require davidrjonas/composer-lock-diff --dev`
+3. `conventional-changelog` as part of the repo `composer require --dev marcocesarato/php-conventional-changelog`
 
 The module audit script requires `libxml2-utils`:
 on Ubuntu `sudo apt install libxml2-utils`

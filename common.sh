@@ -16,7 +16,8 @@ requires() {
 }
 
 COMPOSER="composer"
-COMPOSER_LOCK_DIFF="composer-lock-diff"
+COMPOSER_LOCK_DIFF="./vendor/bin/composer-lock-diff"
+COMPOSER_CHANGELOG="./vendor/bin/conventional-changelog"
 
 requires "curl"
 requires "docker"
@@ -294,13 +295,15 @@ dev_communications() {
     cd "${full_path}/${repo}" || exit
     git fetch --prune
     git checkout develop
-    git pull
+    git pull origin develop
     if [ -z "$(git rev-list --tags --max-count=1)" ]; then
       continue
     fi
     latest_tag_raw=$(git rev-list --tags --max-count=1)
     latest_tag=$(git describe --tags "$latest_tag_raw")
-    git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
+    git log "${latest_tag}..HEAD" --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    $COMPOSER_CHANGELOG
+
     $COMPOSER_LOCK_DIFF --from main --to develop --only-prod | less
     cd - || exit
     wait_to_continue
@@ -362,18 +365,21 @@ merge_to_main() {
     cd "${full_path}/${repo}" || exit
     echo "Git logs for ${repo} printed below to show changes"
     cd "${full_path}/${repo}" || exit
+
+    git fetch --prune
+    git checkout develop
+    git pull origin develop
+    echo "Package changes for ${repo}"
+
     if [ -z "$(git rev-list --tags --max-count=1)" ]; then
       continue
     fi
     latest_tag_raw=$(git rev-list --tags --max-count=1)
     latest_tag=$(git describe --tags "$latest_tag_raw")
-    git log "${latest_tag}..HEAD" --pretty="format:%cd%n%s%n%an%n%b%n--%n--%n"
+    git log "${latest_tag}..HEAD" --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    $COMPOSER_CHANGELOG
 
-    git fetch --prune
-    git checkout develop
-    git pull
-    echo "Package changes for ${repo}"
-    "$COMPOSER_LOCK_DIFF" --from main --to develop --only-prod --md
+    $COMPOSER_LOCK_DIFF --from main --to develop --only-prod --md
     cd - || exit
 
     wait_to_continue
