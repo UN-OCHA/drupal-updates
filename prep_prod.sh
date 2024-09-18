@@ -39,6 +39,10 @@ main () {
       run_cron
       ;;
 
+   testdeploy)
+      testdeploy
+      ;;
+
    prepstage)
       restore_db
       deploy_prod_to_staging
@@ -99,6 +103,14 @@ run_vrt() {
    curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
 }
 
+# Test deploy + VRT on stage.
+testdeploy() {
+   curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} \
+      -H "Content-Type: application/x-www-form-urlencoded" \
+      -d "DOCKER_TAG=${tag}&BACKUP=0"  \
+      "${jenkins_url}/job/${jenkins_other_name}-testdeploy/buildWithParameters"
+}
+
 # Create PR for main.
 create_pr() {
    echo "Creating PR for $repo."
@@ -146,7 +158,7 @@ create_release() {
    gh release create ${next} --target main --title "Deploy ${tomorrow}" --notes-file changes.md
 }
 
-while getopts j:t:c: flag
+while getopts r:t:c: flag
 do
     case "${flag}" in
         r) repo=${OPTARG};;
