@@ -60,7 +60,6 @@ for type in "${options[@]}"; do
         # Extra information.
         extra=""
         # Check if this module is the same as on main
-        cd "${full_path}/${repo}" || exit
         if [ -n "$(git diff -w --word-diff -U1 main composer.lock)" ]; then
           main_version=$(git diff -w --word-diff -U1 main composer.lock | sed -n "/\"name\": \"drupal\/${module_name}\",/{n;p}" | sed -e 's/.*-"\(.*\)",-.*/\1/')
           if [ -n "$main_version" ]; then
@@ -72,7 +71,6 @@ for type in "${options[@]}"; do
         #   extra="$extra - Not as Main"
         # fi
         # rm main.diff
-        cd - || exit
         # Add whether module is patched or pinned.
         if grep "drupal/${module_name}\":" "${full_path}/${repo}/composer.patches.json"; then
           extra="$extra - Patched"
