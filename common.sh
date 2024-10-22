@@ -9,22 +9,24 @@
 set -eu
 
 requires() {
+# TODO: handle alternatives - e.g. xclip or pbcopy.
   if ! command -v "$1" &>/dev/null; then
     echo "Requires $1"
     exit 1
   fi
 }
 
-COMPOSER="composer"
-COMPOSER_LOCK_DIFF="./vendor/bin/composer-lock-diff"
-COMPOSER_CHANGELOG="./vendor/bin/conventional-changelog"
-
+requires $COMPOSER
+requires $COMPOSER_LOCK_DIFF
+requires $COMPOSER_CHANGELOG
 requires "curl"
 requires "docker"
+requires "gh"
 requires "git"
 requires "jq"
 
 source ./.env
+script_path=$PWD
 remote_url=$REMOTE_URL
 full_path=$BASEDIR
 jenkins_url=$JENKINS_URL
@@ -167,10 +169,13 @@ push_changes() {
   echo "pushing to $repo remote"
   echo "- - -"
   echo "- - -"
-  git push -u origin "$branch_name"
-  pr_url=${remote_url}/${repo}/pull/new/${branch_name}
-  echo "Opening url for PR: $pr_url"
-  open_url "${pr_url}"
+  gh pr create --base develop --fill
+
+  pr_id=$(gh pr list --repo un-ocha/$repo --limit 1 | cut -f 1)
+  pr_url="https://github.com/un-ocha/$repo/pull/$pr_id"
+  echo "Opening $pr_url"
+  open_url "$pr_url"
+
   echo "Reverting to develop branch"
   git checkout develop
 
@@ -351,35 +356,45 @@ vrt_comparison() {
 }
 
 merge_to_main() {
-
-  echo "Listing package differences and opening pull requests."
-  echo "List the main Jira tickets as:"
-  printf "## Chores\n\n## Fixes\n\n## Features\n\n## Updates\n\n"
-  echo "Copy drupal package differences to ## Updates section"
-  echo "For an example, look at last month's merge to main"
-  wait_to_continue
+  changes_dir="${script_path}/data"
   for repo in "${repolist[@]}"; do
+    changes_file="${changes_dir}/${repo}/changes.md"
 
-    open_url "${remote_url}/${repo}/compare/main...develop"
-
-    cd "${full_path}/${repo}" || exit
-    echo "Git logs for ${repo} printed below to show changes"
-    cd "${full_path}/${repo}" || exit
+    echo "Creating PR for $repo."
+    cd ${full_path}/${repo}
+    tomorrow=$(date --date="tomorrow" +%d-%m-%Y)
+    ts=$(date --date="tomorrow" +%Y%m%d)
 
     git fetch --prune
     git checkout develop
     git pull origin develop
-    echo "Package changes for ${repo}"
+    $COMPOSER install
 
-    if [ -z "$(git rev-list --tags --max-count=1)" ]; then
-      continue
-    fi
-    latest_tag_raw=$(git rev-list --tags --max-count=1)
-    latest_tag=$(git describe --tags "$latest_tag_raw")
-    git log "${latest_tag}..HEAD" --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    git checkout main
+    git checkout -b deploy-${ts}
+    git merge develop
+
     $COMPOSER_CHANGELOG
+    git diff --unified=0 CHANGELOG.md  | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)' | sed 's/^\+//g' > $changes_file
+    echo "## Composer changes" >> $changes_file
+    echo "" >> $changes_file
+    $COMPOSER_LOCK_DIFF --from main --to develop --only-prod --md >> $changes_file
 
-    $COMPOSER_LOCK_DIFF --from main --to develop --only-prod --md
+    echo Changelog updated and changes.md generated.
+    wait_to_continue
+
+    $COMPOSER update --lock
+    git add composer.lock composer.json CHANGELOG.md
+    git commit -m 'Prepare deployment ${tomorrow}'
+    git push origin deploy-${ts}
+    # Consider adding a reviewer by default with --reviewer option.
+    gh pr create --base main --title "Deploy ${tomorrow}" --body-file $changes_file
+
+    pr_id=$(gh pr list --repo un-ocha/$repo --limit 1 | cut -f 1)
+    pr_url="https://github.com/un-ocha/$repo/pull/$pr_id"
+    echo "Opening $pr_url"
+    open_url $pr_url
+
     cd - || exit
 
     wait_to_continue
@@ -389,33 +404,32 @@ merge_to_main() {
 
 create_tags() {
 
+  changes_dir="${script_path}/data"
   for repo in "${repolist[@]}"; do
-    echo "Creating tag for $repo"
+    changes_file="${changes_dir}/${repo}/changes.md"
 
+    echo "Creating tag for $repo."
     echo "cd-ing to the $repo repo"
     cd "${full_path}/${repo}" || exit
-
-    # Get latest tag.
+    git checkout main
+    git pull origin main
     git fetch --tags
+
     latest=$(git tag --sort=committerdate | tail -1)
+    next_tag=$(echo "${latest}" | awk -F. -v OFS=. '{$NF += 1 ; print}')
+    echo "The new tag will be $next_tag"
 
-    # Get next tag.
-    next=$(echo "${latest}" | awk -F. -v OFS=. '{$NF += 1 ; print}')
-    echo "The new tag will be $next"
-
-    # Final URL
     # today=$(date +%d-%m-%Y)
     tomorrow=$(date --date="tomorrow" +%d-%m-%Y)
-    url="${remote_url}/${repo}/releases/new?target=main&tag=$next&title=Deploy%20$tomorrow"
-    echo "$url"
+    gh release create ${next_tag} --target main --title "Deploy ${tomorrow}" --notes-file $changes_file
 
-    open_url "${url}"
+    =$(gh pr list --repo un-ocha/$repo --limit | cut -f 1)
+    tag_url="https://github.com/un-ocha/$repo/releases/tag/$next_tag"
+    echo "Opening $next_tag"
+    open_url "$tag_url"
   done
 
-  echo "Adjust date and tag version if necessary"
-  echo "Use 'Generate release notes' button to summarize changes."
-  echo "Then copy description from PR to main."
-  echo "For an example, look at last month's tag descriptions."
+  echo "All done"
 }
 
 stage_deploy() {
