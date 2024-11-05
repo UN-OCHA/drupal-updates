@@ -124,7 +124,7 @@ create_pr() {
    $COMPOSER install
 
    git checkout main
-   git checkout -b deploy-20240917
+   git checkout -b deploy-${ts}
    git merge develop
 
    $COMPOSER_CHANGELOG
