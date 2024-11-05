@@ -16,6 +16,8 @@ requires() {
   fi
 }
 
+source ./.env
+
 requires $COMPOSER
 requires $COMPOSER_LOCK_DIFF
 requires $COMPOSER_CHANGELOG
@@ -25,7 +27,6 @@ requires "gh"
 requires "git"
 requires "jq"
 
-source ./.env
 script_path=$PWD
 remote_url=$REMOTE_URL
 full_path=$BASEDIR
