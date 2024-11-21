@@ -16,6 +16,8 @@ requires() {
   fi
 }
 
+source ./.env
+
 requires $COMPOSER
 requires $COMPOSER_LOCK_DIFF
 requires $COMPOSER_CHANGELOG
@@ -25,7 +27,6 @@ requires "gh"
 requires "git"
 requires "jq"
 
-source ./.env
 script_path=$PWD
 remote_url=$REMOTE_URL
 full_path=$BASEDIR
@@ -358,12 +359,15 @@ vrt_comparison() {
 merge_to_main() {
   changes_dir="${script_path}/data"
   for repo in "${repolist[@]}"; do
+    mkdir -p "${changes_dir}/${repo}"
     changes_file="${changes_dir}/${repo}/changes.md"
 
     echo "Creating PR for $repo."
     cd ${full_path}/${repo}
-    tomorrow=$(date --date="tomorrow" +%d-%m-%Y)
-    ts=$(date --date="tomorrow" +%Y%m%d)
+    # date=$(date +%d-%m-%Y)
+    date=$(date --date="tomorrow" +%d-%m-%Y)
+    # datestamp=$(date +%Y%m%d)
+    datestamp=$(date --date="tomorrow" +%Y%m%d)
 
     git fetch --prune
     git checkout develop
@@ -371,7 +375,7 @@ merge_to_main() {
     $COMPOSER install
 
     git checkout main
-    git checkout -b deploy-${ts}
+    git checkout -b deploy-${datestamp}
     git merge develop
 
     $COMPOSER_CHANGELOG
@@ -385,10 +389,10 @@ merge_to_main() {
 
     $COMPOSER update --lock
     git add composer.lock composer.json CHANGELOG.md
-    git commit -m 'Prepare deployment ${tomorrow}'
-    git push origin deploy-${ts}
+    git commit -m "Prepare deployment ${date}"
+    git push origin deploy-${datestamp}
     # Consider adding a reviewer by default with --reviewer option.
-    gh pr create --base main --title "Deploy ${tomorrow}" --body-file $changes_file
+    gh pr create --base main --title "Deploy ${date}" --body-file $changes_file
 
     pr_id=$(gh pr list --repo un-ocha/$repo --limit 1 | cut -f 1)
     pr_url="https://github.com/un-ocha/$repo/pull/$pr_id"
@@ -419,11 +423,10 @@ create_tags() {
     next_tag=$(echo "${latest}" | awk -F. -v OFS=. '{$NF += 1 ; print}')
     echo "The new tag will be $next_tag"
 
-    # today=$(date +%d-%m-%Y)
-    tomorrow=$(date --date="tomorrow" +%d-%m-%Y)
-    gh release create ${next_tag} --target main --title "Deploy ${tomorrow}" --notes-file $changes_file
+    # date=$(date +%d-%m-%Y)
+    date=$(date --date="tomorrow" +%d-%m-%Y)
+    gh release create ${next_tag} --target main --title "Deploy ${date}" --notes-file $changes_file
 
-    =$(gh pr list --repo un-ocha/$repo --limit | cut -f 1)
     tag_url="https://github.com/un-ocha/$repo/releases/tag/$next_tag"
     echo "Opening $next_tag"
     open_url "$tag_url"
