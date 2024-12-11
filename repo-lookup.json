@@ -21,17 +21,6 @@
     "jenkins_other_name": "cerf",
     "jira_name": "CERF"
   },
-  "common-design-site": {
-    "elk_name": "commondesign",
-    "stack_name": "common-design-stack",
-    "dev_url": "dev.commondesign-unocha-org.ahconu.org",
-    "stage_url": "stage.commondesign-unocha-org.ahconu.org",
-    "prod_url": "web.brand.unocha.org",
-    "ga_dashboard": "355487396",
-    "jenkins_name": "Common Design",
-    "jenkins_other_name": "ds-commondesign",
-    "jira_name": "CD"
-  },
   "drupal-starterkit": {
     "elk_name": "n/a",
     "stack_name": "n/a",
