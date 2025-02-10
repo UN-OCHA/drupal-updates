@@ -3,6 +3,7 @@
 
 ai-summarize-site
 cerf8
+common-design-site
 drupal-starterkit
 gms-site
 iasc8
@@ -13,6 +14,10 @@ slt8-site
 sesame-site
 unocha-site
 # whd-site
+
+# For module audit
+fts-site
+hpc-content-site
 
 # Non-drupal repos to keep in mind
 # ocha-api-site
