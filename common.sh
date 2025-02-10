@@ -68,7 +68,7 @@ update_branches() {
   branches=("main" "develop")
   for branch in "${branches[@]}"; do
     echo "Updating $branch branch for $repo"
-    if ! git checkout "$branch"; then
+    if ! git switch "$branch"; then
       echo $?
       echo "- - -"
       echo "Fix the unmerged changes for ${repo} and try this step again"
@@ -115,7 +115,7 @@ need_a_feature_branch() {
       echo "setting feature branch for $repo"
       branch_name="feature/${branch_name}"
       echo "checking out main branch to create feature from"
-      git checkout main
+      git switch main
       break
       ;;
     "no")
@@ -131,7 +131,7 @@ set_new_branch() {
   echo "- - -"
   echo "- - -"
   echo "creating new branch in $repo"
-  git checkout -b "$branch_name"
+  git switch -c "$branch_name"
 
 }
 
@@ -178,7 +178,7 @@ push_changes() {
   open_url "$pr_url"
 
   echo "Reverting to develop branch"
-  git checkout develop
+  git switch develop
 
 }
 
@@ -300,7 +300,7 @@ dev_communications() {
     echo "Git logs and module updates for ${repo} printed below to show changes"
     cd "${full_path}/${repo}" || exit
     git fetch --prune
-    git checkout develop
+    git switch develop
     git pull origin develop
     if [ -z "$(git rev-list --tags --max-count=1)" ]; then
       continue
@@ -329,6 +329,8 @@ vrt_comparison() {
     echo "See https://www.jenkins.io/blog/2018/07/02/new-api-token-system/"
   else
 
+    open_url "${jenkins_url}/view/VRT"
+
     for repo in "${repolist[@]}"; do
 
       # Match repo to other names.
@@ -343,6 +345,7 @@ vrt_comparison() {
       fi
 
       echo "Kicking off jenkins vrt job for $repo."
+      echo "Kick off url: curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} \"${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git\""
       curl -X POST --user ${JENKINS_ID}:${JENKINS_TOKEN} "${jenkins_url}/view/VRT/job/vrt-anonymous/buildWithParameters?delay=0sec&REFERENCE_URI=${prod_url}&TEST_URI=${dev_url}&SITE_REPOSITORY=git@github.com:UN-OCHA/${repo}.git"
       open_url "${jenkins_url}/view/VRT/job/vrt-anonymous"
 
@@ -370,12 +373,12 @@ merge_to_main() {
     datestamp=$(date --date="tomorrow" +%Y%m%d)
 
     git fetch --prune
-    git checkout develop
+    git switch develop
     git pull origin develop
     $COMPOSER install
 
-    git checkout main
-    git checkout -b deploy-${datestamp}
+    git switch main
+    git switch -c deploy-${datestamp}
     git merge develop
 
     $COMPOSER_CHANGELOG
@@ -415,7 +418,7 @@ create_tags() {
     echo "Creating tag for $repo."
     echo "cd-ing to the $repo repo"
     cd "${full_path}/${repo}" || exit
-    git checkout main
+    git switch main
     git pull origin main
     git fetch --tags
 
@@ -511,6 +514,9 @@ post_deployment() {
     echo " * $jenkins_name - __${latest_tag}__ - ${remote_url}/${repo}/releases/tag/${latest_tag}" >> data/latest_tags.txt
 
   done
+
+  echo "\nUpdated overview of the modules we're using is at: https://unitednations.sharepoint.com/:x:/r/sites/OCHAIMB/Digital%20Services%20Section/06_Projects/Developer%20documentation%20and%20standards/Drupal%20sites%20package%20version%20overview.xlsx?d=w95705de2bf904ed4816e200cdcc2b1b8&csf=1&web=1&e=7YpD2t" >> data/latest_tags.txt
+
   echo "List of latest tags is in ./data/latest_tags.txt. Copy that list to the ticket."
   echo "Check all open Jira tickets and update as necessary."
   echo "Run module audit script and update the spreadsheet."
