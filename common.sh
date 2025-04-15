@@ -299,7 +299,7 @@ dev_communications() {
 
     echo "Git logs and module updates for ${repo} printed below to show changes"
     cd "${full_path}/${repo}" || exit
-    git fetch --prune
+    git fetch --prune --tags
     git switch develop
     git pull origin develop
     if [ -z "$(git rev-list --tags --max-count=1)" ]; then
