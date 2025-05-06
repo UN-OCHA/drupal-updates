@@ -422,7 +422,8 @@ create_tags() {
     git pull origin main
     git fetch --tags
 
-    latest=$(git tag --sort=committerdate | tail -1)
+    # Sort by refname to avoid unwanted tags when there are duplications.
+    latest=$(git tag --sort=v:refname --sort=committerdate | tail -1)
     next_tag=$(echo "${latest}" | awk -F. -v OFS=. '{$NF += 1 ; print}')
     echo "The new tag will be $next_tag"
 
